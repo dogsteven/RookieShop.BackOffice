@@ -2,6 +2,8 @@ import { withAuthenticationRequired } from "react-oidc-context";
 import { createBrowserRouter } from "react-router";
 import { withAdministrativeRequirement } from "./hoc";
 import AppLayout from "./app-layout";
+import ProductDashboard from "@/screens/product-dashboard";
+import CategoryDashboard from "@/screens/category-dashboard";
 
 const router = createBrowserRouter([
   {
@@ -15,11 +17,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/products",
-        element: <div>Products</div>
+        Component: ProductDashboard
       },
       {
         path: "/categories",
-        element: <div>Categories</div>
+        Component: CategoryDashboard
       },
       {
         path: "/customers",
