@@ -31,21 +31,25 @@ function CreateProductForm() {
   const form = useForm<z.infer<typeof createProductFormSchema>>({
     resolver: zodResolver(createProductFormSchema),
     defaultValues: {
+      sku: "",
+      name: "",
       description: "",
+      price: 0.0,
+      imageUrl: "",
       isFeatured: false
     }
   });
 
   useEffect(() => {
     if (error) {
-      toast("Some error occurred", {
-        description: error
+      toast.error("An error occurred", {
+        description: error,
       });
     }
   }, [error]);
 
   const onSubmit = useCallback(async (values: z.infer<typeof createProductFormSchema>) => {
-    await dispatch(createProduct({
+    const action = await dispatch(createProduct({
       sku: values.sku,
       name: values.name,
       description: values.description,
@@ -54,6 +58,10 @@ function CreateProductForm() {
       imageUrl: values.imageUrl,
       isFeatured: values.isFeatured
     }));
+
+    if (action.type == createProduct.fulfilled.type) {
+      form.reset();
+    }
   }, []);
 
   return (

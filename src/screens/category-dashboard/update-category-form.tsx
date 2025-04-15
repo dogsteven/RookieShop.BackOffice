@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogHeader } f
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 const updateCategoryFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -17,8 +18,8 @@ const updateCategoryFormSchema = z.object({
 
 function UpdateCategoryForm() {
   const dispatch = useAppDispatch();
-  const { selectedCategory, status } = useAppSelector(state => state.categories);
-  const { isLoading } = status;
+  const { selectedCategory } = useAppSelector(state => state.categories);
+  const { isLoading, error } = useAppSelector(state => state.categories.status.updateCategory);
 
   const [categoryName, setCategoryName] = useState<string | undefined>(undefined);
 
@@ -31,6 +32,14 @@ function UpdateCategoryForm() {
   });
 
   useEffect(() => {
+    if (error) {
+      toast.error("An error occurred", {
+        description: error,
+      });
+    }
+  }, [error]);
+
+  useEffect(() => {
     if (selectedCategory) {
       form.setValue("name", selectedCategory.name);
       form.setValue("description", selectedCategory.description);
@@ -41,13 +50,15 @@ function UpdateCategoryForm() {
 
   const onSubmit = useCallback(async (values: z.infer<typeof updateCategoryFormSchema>) => {
     if (selectedCategory) {
-      await dispatch(updateCategory({
+      const action = await dispatch(updateCategory({
         id: selectedCategory.id,
         name: values.name,
         description: values.description
       }));
 
-      dispatch(unselectCategory());
+      if (action.type == updateCategory.fulfilled.type) {
+        dispatch(unselectCategory());
+      }
     }
   }, [selectedCategory]);
 

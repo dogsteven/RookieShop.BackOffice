@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 const updateProductFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -25,14 +26,17 @@ function UpdateProductForm() {
   const dispatch = useAppDispatch();
   const { categories } = useAppSelector(state => state.categories);
   const { selectedProduct } = useAppSelector(state => state.products);
-  const { isLoading } = useAppSelector(state => state.products.status.updateProduct);
+  const { isLoading, error } = useAppSelector(state => state.products.status.updateProduct);
 
   const [productSku, setProductSku] = useState<string | undefined>(undefined);
 
   const form = useForm<z.infer<typeof updateProductFormSchema>>({
     resolver: zodResolver(updateProductFormSchema),
     defaultValues: {
+      name: "",
       description: "",
+      price: 0.0,
+      imageUrl: "",
       isFeatured: false
     }
   });
@@ -50,9 +54,17 @@ function UpdateProductForm() {
     }
   }, [selectedProduct]);
 
+  useEffect(() => {
+    if (error) {
+      toast.error("An error occurred", {
+        description: error,
+      });
+    }
+  }, [error]);
+
   const onSubmit = useCallback(async (values: z.infer<typeof updateProductFormSchema>) => {
     if (selectedProduct) {
-      await dispatch(updateProduct({
+      const action = await dispatch(updateProduct({
         sku: selectedProduct.sku,
         name: values.name,
         description: values.description,
@@ -62,7 +74,9 @@ function UpdateProductForm() {
         isFeatured: values.isFeatured
       }));
 
-      dispatch(unselectProduct());
+      if (action.type == updateProduct.fulfilled.type) {
+        dispatch(unselectProduct());
+      }
     }
   }, [selectedProduct]);
   

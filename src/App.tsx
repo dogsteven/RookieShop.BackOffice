@@ -13,7 +13,7 @@ function App() {
     <Provider store={store}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AuthProvider userManager={userManager}>
-          <Toaster />
+          <Toaster richColors />
           <RouterProvider router={router} />
         </AuthProvider>
       </ThemeProvider>

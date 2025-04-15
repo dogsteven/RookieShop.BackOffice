@@ -39,7 +39,7 @@ export default class ApiClient {
           userManager.signinRedirect();
         }
       }
-      throw error.response?.data || { message: "An error occurred" };
+      throw new Error(error.response?.data?.message || error.response?.data?.title || "An error occurred" );
     });
   }
 
