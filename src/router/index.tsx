@@ -4,15 +4,20 @@ import { withAdministrativeRequirement } from "./hoc";
 import AppLayout from "./app-layout";
 import ProductDashboard from "@/screens/product-dashboard";
 import CategoryDashboard from "@/screens/category-dashboard";
+import CustomerDashboard from "@/screens/customer-dashboard";
+import Home from "@/screens/home";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <div>Home</div>
+    Component: Home
   },
   {
     Component: withAuthenticationRequired(withAdministrativeRequirement(AppLayout), {
-      OnRedirecting: () => <div>Redirecting...</div>
+      OnRedirecting: () => <div>Redirecting...</div>,
+      signinRedirectArgs: {
+        redirect_uri: `http://localhost:5173/products`
+      }
     }),
     children: [
       {
@@ -25,7 +30,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/customers",
-        element: <div>Customers!</div>
+        Component: CustomerDashboard
       },
     ]
   }

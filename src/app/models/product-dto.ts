@@ -7,6 +7,4 @@ export default interface ProductDto {
   categoryName: string
   imageUrl: string
   isFeatured: boolean
-  createdDate: Date
-  updatedDate: Date
 }

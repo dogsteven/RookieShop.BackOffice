@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { deleteCategory, fetchCategories, selectCategory } from "@/app/redux/categories/categories-slice";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import UpdateCategoryForm from "./update-category-form";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 function CategoryDashboard() {
   const { categories } = useAppSelector(state => state.categories);
@@ -28,52 +29,55 @@ function CategoryDashboard() {
 
       <UpdateCategoryForm />
 
-      <div className="flex flex-col">
-        <div className="m-4">
-          <Table>
-            <TableCaption>All categories of RookieShop</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Id</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead></TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {categories.map((category) => {
-                return (
-                  <TableRow key={category.id}>
-                    <TableCell>{category.id}</TableCell>
-                    <TableCell>{category.name}</TableCell>
-                    <TableCell>{category.description}</TableCell>
-                    <TableCell>
-                      <Button onClick={() => dispatch(selectCategory(category))}>Edit</Button>
-                    </TableCell>
-                    <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive">Delete</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>Are you sure you want to delete category "{category.name}"?</AlertDialogDescription>
-                          </AlertDialogHeader>
+      <div className="flex flex-col w-full">
+        <div className="m-4 w-full">
+          <ScrollArea>
+            <Table className="w-full">
+              <TableCaption>All categories of RookieShop</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Id</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead></TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {categories.map((category) => {
+                  return (
+                    <TableRow key={category.id}>
+                      <TableCell>{category.id}</TableCell>
+                      <TableCell>{category.name}</TableCell>
+                      <TableCell className="max-w-200 text-ellipsis overflow-hidden">{category.description}</TableCell>
+                      <TableCell>
+                        <Button onClick={() => dispatch(selectCategory(category))}>Edit</Button>
+                      </TableCell>
+                      <TableCell>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive">Delete</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>Are you sure you want to delete category "{category.name}"?</AlertDialogDescription>
+                            </AlertDialogHeader>
 
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => dispatch(deleteCategory({ id: category.id }))}>Delete</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => dispatch(deleteCategory({ id: category.id }))}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </div>
       </div>
     </>

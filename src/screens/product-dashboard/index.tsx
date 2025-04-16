@@ -11,6 +11,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { fetchCategories } from "@/app/redux/categories/categories-slice";
 import { Button } from "@/components/ui/button";
 import UpdateProductForm from "./update-product-form";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 function ProductDashboard() {
   const { productCount, currentPageNumber, pageSize, products } = useAppSelector(state => state.products);
@@ -48,69 +49,68 @@ function ProductDashboard() {
 
       <UpdateProductForm />
 
-      <div className="flex flex-col">
-        {/* <div className="grid grid-cols-4 gap-4 p-4">
-          {products.map(product => <ProductCard key={product.sku} product={product} />)}
-        </div> */}
+      <div className="flex flex-col w-full">
+        <div className="m-4 w-full">
+          <ScrollArea>
+            <Table className="w-full">
+              <TableCaption>All products of RookieShop</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>SKU</TableHead>
+                  <TableHead>Image</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Featured</TableHead>
+                  <TableHead></TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
 
-        <div className="m-4">
-          <Table>
-            <TableCaption>All products of RookieShop</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>SKU</TableHead>
-                <TableHead>Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Featured</TableHead>
-                <TableHead></TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
+              <TableBody>
+                {products.map(product => {
+                  const categoryName = categories.find((category) => category.id == product.categoryId)?.name ?? "Empty";
 
-            <TableBody>
-              {products.map(product => {
-                const categoryName = categories.find((category) => category.id == product.categoryId)?.name ?? "Empty";
+                  return (
+                    <TableRow key={product.sku}>
+                      <TableCell>{product.sku}</TableCell>
+                      <TableCell>
+                        <img src={product.imageUrl} className="w-12 rounded-sm aspect-square object-cover" />
+                      </TableCell>
+                      <TableCell>{product.name}</TableCell>
+                      <TableCell className="max-w-100 text-ellipsis overflow-hidden">{product.description}</TableCell>
+                      <TableCell>{product.price}</TableCell>
+                      <TableCell>{categoryName}</TableCell>                    
+                      <TableCell>{product.isFeatured ? "Yes" : "No"}</TableCell>
+                      <TableCell>
+                        <Button onClick={() => dispatch(selectProduct(product))}>Edit</Button>
+                      </TableCell>
+                      <TableCell>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive">Delete</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>Are you sure you want to delete product "{product.sku}"?</AlertDialogDescription>
+                            </AlertDialogHeader>
 
-                return (
-                  <TableRow key={product.sku}>
-                    <TableCell>{product.sku}</TableCell>
-                    <TableCell>
-                      <img src={product.imageUrl} className="w-12 rounded-sm aspect-square object-cover" />
-                    </TableCell>
-                    <TableCell>{product.name}</TableCell>
-                    <TableCell>{product.description}</TableCell>
-                    <TableCell>{product.price}</TableCell>
-                    <TableCell>{categoryName}</TableCell>                    
-                    <TableCell>{product.isFeatured ? "Yes" : "No"}</TableCell>
-                    <TableCell>
-                      <Button onClick={() => dispatch(selectProduct(product))}>Edit</Button>
-                    </TableCell>
-                    <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive">Delete</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>Are you sure you want to delete product "{product.sku}"?</AlertDialogDescription>
-                          </AlertDialogHeader>
-
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => dispatch(deleteProduct({ sku: product.sku }))}>Delete</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => dispatch(deleteProduct({ sku: product.sku }))}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </div>
 
         <div className="flex flex-row content-center mt-4">
