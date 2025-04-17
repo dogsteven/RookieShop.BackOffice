@@ -95,7 +95,7 @@ export const updateProduct = createAsyncThunk<void, UpdateProductModel, { extra:
   await productService.updateProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.imageUrl, model.isFeatured);
 
   await dispatch(fetchProductPage({
-    pageNumber: state.currentPageNumber,
+    pageNumber: 1,
     pageSize: state.pageSize
   }));
 });

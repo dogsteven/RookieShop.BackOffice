@@ -15,10 +15,10 @@ import { toast } from "sonner";
 
 const updateProductFormSchema = z.object({
   name: z.string().min(1).max(100),
-  description: z.string().min(0).max(500),
+  description: z.string().min(0).max(1000),
   price: z.coerce.number().positive(),
   categoryId: z.string({ required_error: "Please select an category." }),
-  imageUrl: z.string().url().min(1).max(250),
+  imageUrl: z.string().url().min(1).max(500),
   isFeatured: z.boolean()
 });
 
