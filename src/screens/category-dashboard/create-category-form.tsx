@@ -6,10 +6,11 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger, D
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
+import { ProblemDetails } from "@/app/services/api-client";
 
 const createCategoryFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -18,7 +19,7 @@ const createCategoryFormSchema = z.object({
 
 function CreateCategoryForm() {
   const dispatch = useAppDispatch();
-  const { isLoading, error } = useAppSelector(state => state.categories.status.createCategory);
+  const { isLoading } = useAppSelector(state => state.categories.status.createCategory);
 
   const form = useForm<z.infer<typeof createCategoryFormSchema>>({
     resolver: zodResolver(createCategoryFormSchema),
@@ -28,14 +29,6 @@ function CreateCategoryForm() {
     }
   });
 
-  useEffect(() => {
-    if (error) {
-      toast.error("An error occurred", {
-        description: error,
-      });
-    }
-  }, [error]);
-
   const onSubmit = useCallback(async (values: z.infer<typeof createCategoryFormSchema>) => {
     const action = await dispatch(createCategory({
       name: values.name,
@@ -44,6 +37,11 @@ function CreateCategoryForm() {
 
     if (action.type == createCategory.fulfilled.type) {
       form.reset();
+    } else if (action.type == createCategory.rejected.type) {
+      const problemDetails = action.payload as ProblemDetails;
+      toast.error(problemDetails.title, {
+        description: problemDetails.detail
+      });
     }
   }, []);
 

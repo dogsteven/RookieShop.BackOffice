@@ -10,6 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { ProblemDetails } from "@/app/services/api-client";
 
 const updateCategoryFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -19,7 +20,7 @@ const updateCategoryFormSchema = z.object({
 function UpdateCategoryForm() {
   const dispatch = useAppDispatch();
   const { selectedCategory } = useAppSelector(state => state.categories);
-  const { isLoading, error } = useAppSelector(state => state.categories.status.updateCategory);
+  const { isLoading } = useAppSelector(state => state.categories.status.updateCategory);
 
   const [categoryName, setCategoryName] = useState<string | undefined>(undefined);
 
@@ -30,14 +31,6 @@ function UpdateCategoryForm() {
       description: ""
     }
   });
-
-  useEffect(() => {
-    if (error) {
-      toast.error("An error occurred", {
-        description: error,
-      });
-    }
-  }, [error]);
 
   useEffect(() => {
     if (selectedCategory) {
@@ -58,6 +51,11 @@ function UpdateCategoryForm() {
 
       if (action.type == updateCategory.fulfilled.type) {
         dispatch(unselectCategory());
+      } else if (action.type == updateCategory.rejected.type) {
+        const problemDetails = action.payload as ProblemDetails;
+        toast.error(problemDetails.title, {
+          description: problemDetails.detail
+        });
       }
     }
   }, [selectedCategory]);

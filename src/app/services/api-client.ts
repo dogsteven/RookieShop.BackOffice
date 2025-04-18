@@ -1,6 +1,22 @@
 import userManager from "@/oidc/user-manager";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosRequestHeaders } from "axios";
 
+export interface ProblemDetails {
+  statusCode: number
+  title: string
+  detail: string
+}
+
+export class ProblemDetailsError extends Error {
+  public readonly problemDetails: ProblemDetails;
+
+  public constructor(problemDetails: ProblemDetails) {
+    super(problemDetails.detail);
+
+    this.problemDetails = problemDetails;
+  }
+}
+
 export default class ApiClient {
   private readonly axios: AxiosInstance;
 
@@ -39,7 +55,8 @@ export default class ApiClient {
           userManager.signinRedirect();
         }
       }
-      throw new Error(error.response?.data?.message || error.response?.data?.title || "An error occurred" );
+
+      throw new ProblemDetailsError(error.response.data);
     });
   }
 

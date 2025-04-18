@@ -53,7 +53,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={location.pathname == item.url}>
+                    <SidebarMenuButton asChild isActive={location.pathname.startsWith(item.url)}>
                       <NavLink to={item.url}>{item.title}</NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

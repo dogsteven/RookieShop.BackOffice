@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { ProblemDetails } from "@/app/services/api-client";
 
 const updateProductFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -26,7 +27,7 @@ function UpdateProductForm() {
   const dispatch = useAppDispatch();
   const { categories } = useAppSelector(state => state.categories);
   const { selectedProduct } = useAppSelector(state => state.products);
-  const { isLoading, error } = useAppSelector(state => state.products.status.updateProduct);
+  const { isLoading } = useAppSelector(state => state.products.status.updateProduct);
 
   const [productSku, setProductSku] = useState<string | undefined>(undefined);
 
@@ -54,14 +55,6 @@ function UpdateProductForm() {
     }
   }, [selectedProduct]);
 
-  useEffect(() => {
-    if (error) {
-      toast.error("An error occurred", {
-        description: error,
-      });
-    }
-  }, [error]);
-
   const onSubmit = useCallback(async (values: z.infer<typeof updateProductFormSchema>) => {
     if (selectedProduct) {
       const action = await dispatch(updateProduct({
@@ -76,6 +69,11 @@ function UpdateProductForm() {
 
       if (action.type == updateProduct.fulfilled.type) {
         dispatch(unselectProduct());
+      } else if (action.type == updateProduct.rejected.type) {
+        const problemDetails = action.payload as ProblemDetails;
+        toast.error(problemDetails.title, {
+          description: problemDetails.detail
+        });
       }
     }
   }, [selectedProduct]);

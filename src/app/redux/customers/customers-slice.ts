@@ -1,6 +1,7 @@
 import CustomerDto from "@/app/models/customer-dto"
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { ExtraArguments, RootState } from "../store"
+import { ProblemDetailsError } from "@/app/services/api-client"
 
 export interface Status {
   isLoading: boolean,
@@ -35,7 +36,11 @@ export interface FetchCustomerPageModel {
 export const fetchCustomerPage = createAsyncThunk<CustomerDto[], FetchCustomerPageModel, { extra: ExtraArguments, state: RootState }>("customers/fetchCustomerPage", async (model, thunkApi) => {
   const customerService = thunkApi.extra.customerService;
 
-  return await customerService.getCustomers(model.pageNumber, model.pageSize);
+  try {
+    return await customerService.getCustomers(model.pageNumber, model.pageSize);
+  } catch (error) {
+    return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
+  }
 });
 
 const customersSlice = createSlice({

@@ -2,10 +2,10 @@ import Pagination from "@/app/models/pagination";
 import ProductDto from "@/app/models/product-dto";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ExtraArguments, RootState } from "../store";
+import { ProblemDetailsError } from "@/app/services/api-client";
 
 export interface Status {
-  isLoading: boolean,
-  error?: string
+  isLoading: boolean
 }
 
 export interface ProductsState {
@@ -51,7 +51,11 @@ export interface FetchProductPageModel {
 export const fetchProductPage = createAsyncThunk<Pagination<ProductDto>, FetchProductPageModel, { extra: ExtraArguments, state: RootState }>("products/fetchProductPage", async (model, thunkApi) => {
   const productService = thunkApi.extra.productService;
 
-  return await productService.getProducts(model.pageNumber, model.pageSize);
+  try {
+    return await productService.getProducts(model.pageNumber, model.pageSize);
+  } catch (error) {
+    return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
+  }
 });
 
 export interface CreateProductModel {
@@ -69,12 +73,16 @@ export const createProduct = createAsyncThunk<void, CreateProductModel, { extra:
   const dispatch = thunkApi.dispatch;
   const state = thunkApi.getState().products;
 
-  await productService.createProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.imageUrl, model.isFeatured);
+  try {
+    await productService.createProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.imageUrl, model.isFeatured);
 
-  await dispatch(fetchProductPage({
-    pageNumber: 1,
-    pageSize: state.pageSize
-  }));
+    await dispatch(fetchProductPage({
+      pageNumber: 1,
+      pageSize: state.pageSize
+    }));
+  } catch (error) {
+    return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
+  }
 });
 
 export interface UpdateProductModel {
@@ -92,12 +100,16 @@ export const updateProduct = createAsyncThunk<void, UpdateProductModel, { extra:
   const dispatch = thunkApi.dispatch;
   const state = thunkApi.getState().products;
 
-  await productService.updateProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.imageUrl, model.isFeatured);
+  try {
+    await productService.updateProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.imageUrl, model.isFeatured);
 
-  await dispatch(fetchProductPage({
-    pageNumber: 1,
-    pageSize: state.pageSize
-  }));
+    await dispatch(fetchProductPage({
+      pageNumber: 1,
+      pageSize: state.pageSize
+    }));
+  } catch (error) {
+    return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails); 
+  }
 });
 
 export interface DeleteProductModel {
@@ -109,12 +121,16 @@ export const deleteProduct = createAsyncThunk<void, DeleteProductModel, { extra:
   const dispatch = thunkApi.dispatch;
   const state = thunkApi.getState().products;
 
-  await productService.deleteProduct(model.sku);
+  try {
+    await productService.deleteProduct(model.sku);
 
-  await dispatch(fetchProductPage({
-    pageNumber: 1,
-    pageSize: state.pageSize
-  }));
+    await dispatch(fetchProductPage({
+      pageNumber: 1,
+      pageSize: state.pageSize
+    }));
+  } catch (error) {
+    return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails); 
+  }
 });
 
 const productsSlice = createSlice({
@@ -137,7 +153,6 @@ const productsSlice = createSlice({
     builder
       .addCase(fetchProductPage.pending, (state) => {
         state.status.fetchProductPage.isLoading = true;
-        state.status.fetchProductPage.error = undefined;
       })
       .addCase(fetchProductPage.fulfilled, (state, action) => {
         state.products = action.payload.items;
@@ -146,53 +161,42 @@ const productsSlice = createSlice({
         state.pageSize = action.payload.pageSize;
 
         state.status.fetchProductPage.isLoading = false;
-        state.status.fetchProductPage.error = undefined;
       })
-      .addCase(fetchProductPage.rejected, (state, action) => {
+      .addCase(fetchProductPage.rejected, (state) => {
         state.status.fetchProductPage.isLoading = false;
-        state.status.fetchProductPage.error = action.error.message;
       });
     
     builder
       .addCase(createProduct.pending, (state) => {
         state.status.createProduct.isLoading = true;
-        state.status.createProduct.error = undefined;
       })
       .addCase(createProduct.fulfilled, (state) => {
         state.status.createProduct.isLoading = false;
-        state.status.createProduct.error = undefined;
       })
-      .addCase(createProduct.rejected, (state, action) => {
+      .addCase(createProduct.rejected, (state) => {
         state.status.createProduct.isLoading = false;
-        state.status.createProduct.error = action.error.message;
       });
 
     builder
       .addCase(updateProduct.pending, (state) => {
         state.status.updateProduct.isLoading = true;
-        state.status.updateProduct.error = undefined;
       })
       .addCase(updateProduct.fulfilled, (state) => {
         state.status.updateProduct.isLoading = false;
-        state.status.updateProduct.error = undefined;
       })
-      .addCase(updateProduct.rejected, (state, action) => {
+      .addCase(updateProduct.rejected, (state) => {
         state.status.updateProduct.isLoading = false;
-        state.status.updateProduct.error = action.error.message;
       });
     
     builder
       .addCase(deleteProduct.pending, (state) => {
         state.status.deleteProduct.isLoading = true;
-        state.status.deleteProduct.error = undefined;
       })
       .addCase(deleteProduct.fulfilled, (state) => {
         state.status.deleteProduct.isLoading = false;
-        state.status.deleteProduct.error = undefined;
       })
-      .addCase(deleteProduct.rejected, (state, action) => {
+      .addCase(deleteProduct.rejected, (state) => {
         state.status.deleteProduct.isLoading = false;
-        state.status.deleteProduct.error = action.error.message;
       });
   }
 });

@@ -2,7 +2,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger, DialogHeader } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { ProblemDetails } from "@/app/services/api-client";
 
 const createProductFormSchema = z.object({
   sku: z.string().min(1).max(16),
@@ -26,7 +27,7 @@ const createProductFormSchema = z.object({
 function CreateProductForm() {
   const dispatch = useAppDispatch();
   const { categories } = useAppSelector(state => state.categories);
-  const { isLoading, error } = useAppSelector(state => state.products.status.createProduct);
+  const { isLoading } = useAppSelector(state => state.products.status.createProduct);
 
   const form = useForm<z.infer<typeof createProductFormSchema>>({
     resolver: zodResolver(createProductFormSchema),
@@ -39,14 +40,6 @@ function CreateProductForm() {
       isFeatured: false
     }
   });
-
-  useEffect(() => {
-    if (error) {
-      toast.error("An error occurred", {
-        description: error,
-      });
-    }
-  }, [error]);
 
   const onSubmit = useCallback(async (values: z.infer<typeof createProductFormSchema>) => {
     const action = await dispatch(createProduct({
@@ -61,6 +54,11 @@ function CreateProductForm() {
 
     if (action.type == createProduct.fulfilled.type) {
       form.reset();
+    } else if (action.type == createProduct.rejected.type) {
+      const problemDetails = action.payload as ProblemDetails;
+      toast.error(problemDetails.title, {
+        description: problemDetails.detail
+      });
     }
   }, []);
 

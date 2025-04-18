@@ -1,10 +1,10 @@
 import CategoryDto from "@/app/models/category-dto";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ExtraArguments, RootState } from "../store";
+import { ProblemDetailsError } from "@/app/services/api-client";
 
 export interface Status {
-  isLoading: boolean,
-  error?: string
+  isLoading: boolean
 }
 
 export interface CategoriesState {
@@ -39,7 +39,11 @@ const initialState: CategoriesState = {
 export const fetchCategories = createAsyncThunk<CategoryDto[], void, { extra: ExtraArguments, state: RootState }>("categories/fetchCategories", async (_, thunkApi) => {
   const categoryService = thunkApi.extra.categoryService;
 
-  return await categoryService.getCategories();
+  try {
+    return await categoryService.getCategories();
+  } catch (error) {
+    return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
+  }
 });
 
 export interface CreateCategoryModel {
@@ -50,13 +54,17 @@ export interface CreateCategoryModel {
 export const createCategory = createAsyncThunk<CategoryDto, CreateCategoryModel, { extra: ExtraArguments, state: RootState }>("categories/createCategory", async (model, thunkApi) => {
   const categoryService = thunkApi.extra.categoryService;
 
-  const { id } = await categoryService.createCategory(model.name, model.description);
+  try {
+    const { id } = await categoryService.createCategory(model.name, model.description);
 
-  return {
-    id: id,
-    name: model.name,
-    description: model.description
-  };
+    return {
+      id: id,
+      name: model.name,
+      description: model.description
+    };
+  } catch (error) {
+    return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
+  }
 });
 
 export interface UpdateCategoryModel {
@@ -68,13 +76,17 @@ export interface UpdateCategoryModel {
 export const updateCategory = createAsyncThunk<CategoryDto, UpdateCategoryModel, { extra: ExtraArguments, state: RootState }>("categories/updateCategory", async (model, thunkApi) => {
   const categoryService = thunkApi.extra.categoryService;
 
-  await categoryService.updateCategory(model.id, model.name, model.description);
+  try {
+    await categoryService.updateCategory(model.id, model.name, model.description);
 
-  return {
-    id: model.id,
-    name: model.name,
-    description: model.description
-  };
+    return {
+      id: model.id,
+      name: model.name,
+      description: model.description
+    };
+  } catch (error) {
+    return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
+  }
 });
 
 export interface DeleteCategoryModel {
@@ -84,9 +96,13 @@ export interface DeleteCategoryModel {
 export const deleteCategory = createAsyncThunk<number, DeleteCategoryModel, { extra: ExtraArguments, state: RootState }>("categories/deleteCategory", async (model, thunkApi) => {
   const categoryService = thunkApi.extra.categoryService;
 
-  await categoryService.deleteCategory(model.id);
+  try {
+    await categoryService.deleteCategory(model.id);
 
-  return model.id;
+    return model.id;
+  } catch (error) {
+    return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
+  }
 });
 
 const categoriesSlice = createSlice({
@@ -105,37 +121,30 @@ const categoriesSlice = createSlice({
     builder
       .addCase(fetchCategories.pending, (state) => {
         state.status.fetchCategories.isLoading = true;
-        state.status.fetchCategories.error = undefined;
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.categories = action.payload;
         state.status.fetchCategories.isLoading = false;
-        state.status.fetchCategories.error = undefined;
       })
-      .addCase(fetchCategories.rejected, (state, action) => {
+      .addCase(fetchCategories.rejected, (state) => {
         state.status.fetchCategories.isLoading = false;
-        state.status.fetchCategories.error = action.error.message;
       });
     
     builder
       .addCase(createCategory.pending, (state) => {
         state.status.createCategory.isLoading = true;
-        state.status.createCategory.error = undefined;
       })
       .addCase(createCategory.fulfilled, (state, action) => {
         state.categories.unshift(action.payload);
         state.status.createCategory.isLoading = false;
-        state.status.createCategory.error = undefined;
       })
-      .addCase(createCategory.rejected, (state, action) => {
+      .addCase(createCategory.rejected, (state) => {
         state.status.createCategory.isLoading = false;
-        state.status.createCategory.error = action.error.message;
       });
       
     builder
       .addCase(updateCategory.pending, (state) => {
         state.status.updateCategory.isLoading = true;
-        state.status.updateCategory.error = undefined;
       })
       .addCase(updateCategory.fulfilled, (state, action) => {
         const index = state.categories.findIndex((category) => category.id == action.payload.id);
@@ -148,17 +157,14 @@ const categoriesSlice = createSlice({
         }
 
         state.status.updateCategory.isLoading = false;
-        state.status.updateCategory.error = undefined;
       })
-      .addCase(updateCategory.rejected, (state, action) => {
+      .addCase(updateCategory.rejected, (state) => {
         state.status.updateCategory.isLoading = false;
-        state.status.updateCategory.error = action.error.message;
       });
     
     builder
       .addCase(deleteCategory.pending, (state) => {
         state.status.deleteCategory.isLoading = true;
-        state.status.deleteCategory.error = undefined;
       })
       .addCase(deleteCategory.fulfilled, (state, action) => {
         const index = state.categories.findIndex((category) => category.id == action.payload);
@@ -167,12 +173,10 @@ const categoriesSlice = createSlice({
           state.categories.splice(index, 1);
         }
 
-        state.status.deleteCategory.isLoading = false;
-        state.status.deleteCategory.error = undefined;        
+        state.status.deleteCategory.isLoading = false;      
       })
-      .addCase(deleteCategory.rejected, (state, action) => {
+      .addCase(deleteCategory.rejected, (state) => {
         state.status.deleteCategory.isLoading = false;
-        state.status.deleteCategory.error = action.error.message;
       });
   }
 });
