@@ -1,19 +1,20 @@
 import CustomerDto from "@/app/models/customer-dto"
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { ExtraArguments, RootState } from "../store"
-import { ProblemDetailsError } from "@/app/services/api-client"
+import { ProblemDetails, ProblemDetailsError } from "@/app/services/api-client"
 
-export interface Status {
-  isLoading: boolean,
-  error?: string
-}
-
-export interface CustomersState {
+interface CustomersState {
   customers: CustomerDto[]
   currentPageNumber: number
   pageSize: number
-  status: {
-    fetchCustomerPage: Status
+  
+  isLoading: {
+    fetchCustomerPage: boolean
+  }
+
+  error?: {
+    title: string
+    detail: string
   }
 }
 
@@ -21,14 +22,13 @@ const initialState: CustomersState = {
   customers: [],
   currentPageNumber: 1,
   pageSize: 10,
-  status: {
-    fetchCustomerPage: {
-      isLoading: false
-    }
+  
+  isLoading: {
+    fetchCustomerPage: false
   }
 };
 
-export interface FetchCustomerPageModel {
+interface FetchCustomerPageModel {
   pageNumber: number
   pageSize: number
 }
@@ -49,28 +49,36 @@ const customersSlice = createSlice({
   reducers: {
     setCurrentPageNumber: (state, action: PayloadAction<number>) => {
       state.currentPageNumber = action.payload;
+    },
+
+    clearError: (state) => {
+      state.error = undefined;
     }
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchCustomerPage.pending, (state) => {
-        state.status.fetchCustomerPage.isLoading = true;
-        state.status.fetchCustomerPage.error = undefined;
+        state.isLoading.fetchCustomerPage = true;
       })
       .addCase(fetchCustomerPage.fulfilled, (state, action) => {
         state.customers = action.payload;
 
-        state.status.fetchCustomerPage.isLoading = false;
-        state.status.fetchCustomerPage.error = undefined;
+        state.isLoading.fetchCustomerPage = false;
       })
       .addCase(fetchCustomerPage.rejected, (state, action) => {
-        state.status.fetchCustomerPage.isLoading = false;
-        state.status.fetchCustomerPage.error = action.error.message;
+        state.isLoading.fetchCustomerPage = false;
+        
+        const payload = action.payload as ProblemDetails;
+
+        state.error = {
+          title: payload.title,
+          detail: payload.detail
+        };
       });
   }
 });
 
-export const { setCurrentPageNumber } = customersSlice.actions;
+export const { setCurrentPageNumber, clearError } = customersSlice.actions;
 
 const customersReducer = customersSlice.reducer;
 

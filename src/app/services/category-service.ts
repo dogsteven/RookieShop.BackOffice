@@ -3,7 +3,7 @@ import ApiClient from "./api-client";
 
 export default interface CategoryService {
   getCategories() : Promise<CategoryDto[]>
-  createCategory(name: string, description: string) : Promise<{ id: number }>
+  createCategory(name: string, description: string) : Promise<number>
   updateCategory(id: number, name: string, description: string) : Promise<void>
   deleteCategory(id: number) : Promise<void>
 }
@@ -19,11 +19,13 @@ export class CategoryApiService implements CategoryService {
     return await this.client.get("/api/Category");
   }
 
-  public async createCategory(name: string, description: string): Promise<{ id: number; }> {
-    return await this.client.post("/api/Category", {
+  public async createCategory(name: string, description: string): Promise<number> {
+    const { id } = await this.client.post<{ id: number }>("/api/Category", {
       name: name,
       description: description
     });
+
+    return id;
   }
 
   public async updateCategory(id: number, name: string, description: string): Promise<void> {

@@ -2,50 +2,69 @@ import Pagination from "@/app/models/pagination";
 import ProductDto from "@/app/models/product-dto";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ExtraArguments, RootState } from "../store";
-import { ProblemDetailsError } from "@/app/services/api-client";
+import { ProblemDetails, ProblemDetailsError } from "@/app/services/api-client";
 
-export interface Status {
-  isLoading: boolean
-}
-
-export interface ProductsState {
-  products: ProductDto[],
-  productCount: number,
-  currentPageNumber: number,
-  pageSize: number,
-  status: {
-    fetchProductPage: Status,
-    createProduct: Status,
-    updateProduct: Status,
-    deleteProduct: Status
-  },
+interface ProductsState {
+  products: ProductDto[]
+  productCount: number
+  currentPageNumber: number
+  pageSize: number
   selectedProduct?: ProductDto
+
+  isLoading: {
+    fetchProductPage: boolean
+    createProduct: boolean
+    updateProduct: boolean
+    deleteProduct: boolean
+  }
+
+  error?: {
+    title: string
+    detail: string
+  }
 }
 
 const initialState: ProductsState = {
   products: [],
   productCount: 0,
   currentPageNumber: 1,
-  pageSize: 8,
-  status: {
-    fetchProductPage: {
-      isLoading: false
-    },
-    createProduct: {
-      isLoading: false
-    },
-    updateProduct: {
-      isLoading: false
-    },
-    deleteProduct: {
-      isLoading: false
-    }
+  pageSize: 12,
+  
+  isLoading: {
+    fetchProductPage: false,
+    createProduct: false,
+    updateProduct: false,
+    deleteProduct: false
   }
 };
 
-export interface FetchProductPageModel {
+interface FetchProductPageModel {
   pageNumber: number
   pageSize: number
+}
+
+interface CreateProductModel {
+  sku: string
+  name: string
+  description: string
+  price: number
+  categoryId: number
+  imageUrl: string
+  isFeatured: boolean
+}
+
+interface UpdateProductModel {
+  sku: string
+  name: string
+  description: string
+  price: number
+  categoryId: number
+  imageUrl: string
+  isFeatured: boolean
+}
+
+interface DeleteProductModel {
+  sku: string
 }
 
 export const fetchProductPage = createAsyncThunk<Pagination<ProductDto>, FetchProductPageModel, { extra: ExtraArguments, state: RootState }>("products/fetchProductPage", async (model, thunkApi) => {
@@ -57,16 +76,6 @@ export const fetchProductPage = createAsyncThunk<Pagination<ProductDto>, FetchPr
     return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
   }
 });
-
-export interface CreateProductModel {
-  sku: string
-  name: string
-  description: string
-  price: number
-  categoryId: number
-  imageUrl: string
-  isFeatured: boolean
-}
 
 export const createProduct = createAsyncThunk<void, CreateProductModel, { extra: ExtraArguments, state: RootState }>("products/createProduct", async (model, thunkApi) => {
   const productService = thunkApi.extra.productService;
@@ -85,16 +94,6 @@ export const createProduct = createAsyncThunk<void, CreateProductModel, { extra:
   }
 });
 
-export interface UpdateProductModel {
-  sku: string
-  name: string
-  description: string
-  price: number
-  categoryId: number
-  imageUrl: string
-  isFeatured: boolean
-}
-
 export const updateProduct = createAsyncThunk<void, UpdateProductModel, { extra: ExtraArguments, state: RootState }>("products/updateProduct", async (model, thunkApi) => {
   const productService = thunkApi.extra.productService;
   const dispatch = thunkApi.dispatch;
@@ -111,10 +110,6 @@ export const updateProduct = createAsyncThunk<void, UpdateProductModel, { extra:
     return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails); 
   }
 });
-
-export interface DeleteProductModel {
-  sku: string
-}
 
 export const deleteProduct = createAsyncThunk<void, DeleteProductModel, { extra: ExtraArguments, state: RootState }>("products/deleteProduct", async (model, thunkApi) => {
   const productService = thunkApi.extra.productService;
@@ -147,12 +142,16 @@ const productsSlice = createSlice({
 
     unselectProduct: (state) => {
       state.selectedProduct = undefined;
+    },
+
+    clearError: (state) => {
+      state.error = undefined;
     }
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProductPage.pending, (state) => {
-        state.status.fetchProductPage.isLoading = true;
+        state.isLoading.fetchProductPage = true;
       })
       .addCase(fetchProductPage.fulfilled, (state, action) => {
         state.products = action.payload.items;
@@ -160,43 +159,71 @@ const productsSlice = createSlice({
         state.currentPageNumber = action.payload.pageNumber;
         state.pageSize = action.payload.pageSize;
 
-        state.status.fetchProductPage.isLoading = false;
+        state.isLoading.fetchProductPage = false;
       })
-      .addCase(fetchProductPage.rejected, (state) => {
-        state.status.fetchProductPage.isLoading = false;
+      .addCase(fetchProductPage.rejected, (state, action) => {
+        state.isLoading.fetchProductPage = false;
+
+        const payload = action.payload as ProblemDetails;
+
+        state.error = {
+          title: payload.title,
+          detail: payload.detail
+        };
       });
     
     builder
       .addCase(createProduct.pending, (state) => {
-        state.status.createProduct.isLoading = true;
+        state.isLoading.createProduct = true;
       })
       .addCase(createProduct.fulfilled, (state) => {
-        state.status.createProduct.isLoading = false;
+        state.isLoading.createProduct = false;
       })
-      .addCase(createProduct.rejected, (state) => {
-        state.status.createProduct.isLoading = false;
+      .addCase(createProduct.rejected, (state, action) => {
+        state.isLoading.createProduct = false;
+
+        const payload = action.payload as ProblemDetails;
+
+        state.error = {
+          title: payload.title,
+          detail: payload.detail
+        };
       });
 
     builder
       .addCase(updateProduct.pending, (state) => {
-        state.status.updateProduct.isLoading = true;
+        state.isLoading.updateProduct = true;
       })
       .addCase(updateProduct.fulfilled, (state) => {
-        state.status.updateProduct.isLoading = false;
+        state.isLoading.updateProduct = false;
       })
-      .addCase(updateProduct.rejected, (state) => {
-        state.status.updateProduct.isLoading = false;
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.isLoading.updateProduct = false;
+        
+        const payload = action.payload as ProblemDetails;
+
+        state.error = {
+          title: payload.title,
+          detail: payload.detail
+        };
       });
     
     builder
       .addCase(deleteProduct.pending, (state) => {
-        state.status.deleteProduct.isLoading = true;
+        state.isLoading.deleteProduct = true;
       })
       .addCase(deleteProduct.fulfilled, (state) => {
-        state.status.deleteProduct.isLoading = false;
+        state.isLoading.deleteProduct = false;
       })
-      .addCase(deleteProduct.rejected, (state) => {
-        state.status.deleteProduct.isLoading = false;
+      .addCase(deleteProduct.rejected, (state, action) => {
+        state.isLoading.deleteProduct = false;
+
+        const payload = action.payload as ProblemDetails;
+
+        state.error = {
+          title: payload.title,
+          detail: payload.detail
+        };
       });
   }
 });
@@ -205,7 +232,8 @@ const productsSlice = createSlice({
 export const {
   setCurrentPageNumber,
   selectProduct,
-  unselectProduct
+  unselectProduct,
+  clearError
 } = productsSlice.actions;
 
 const productsReducer = productsSlice.reducer;

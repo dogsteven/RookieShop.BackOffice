@@ -3,9 +3,10 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { fetchCustomerPage } from "@/app/redux/customers/customers-slice";
+import { fetchCustomerPage, setCurrentPageNumber } from "@/app/redux/customers/customers-slice";
 import { useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import RookieShopPagination from "@/components/rookie-shop-pagination";
 
 function CustomerDashboard() {
   const dispatch = useAppDispatch();
@@ -59,9 +60,14 @@ function CustomerDashboard() {
                 })}
               </TableBody>
             </Table>
-          <ScrollBar orientation="horizontal" />
+            <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </div>
+
+        <RookieShopPagination
+          currentPageNumber={currentPageNumber}
+          setCurrentPageNumber={(number) => dispatch(setCurrentPageNumber(number))}
+        />
       </div>
     </>
   );

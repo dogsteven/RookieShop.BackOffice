@@ -9,8 +9,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { toast } from "sonner";
-import { ProblemDetails } from "@/app/services/api-client";
 
 const createCategoryFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -19,7 +17,7 @@ const createCategoryFormSchema = z.object({
 
 function CreateCategoryForm() {
   const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector(state => state.categories.status.createCategory);
+  const { isLoading: { createCategory: isLoading } } = useAppSelector(state => state.categories);
 
   const form = useForm<z.infer<typeof createCategoryFormSchema>>({
     resolver: zodResolver(createCategoryFormSchema),
@@ -30,19 +28,10 @@ function CreateCategoryForm() {
   });
 
   const onSubmit = useCallback(async (values: z.infer<typeof createCategoryFormSchema>) => {
-    const action = await dispatch(createCategory({
+    dispatch(createCategory({
       name: values.name,
       description: values.description
     }));
-
-    if (action.type == createCategory.fulfilled.type) {
-      form.reset();
-    } else if (action.type == createCategory.rejected.type) {
-      const problemDetails = action.payload as ProblemDetails;
-      toast.error(problemDetails.title, {
-        description: problemDetails.detail
-      });
-    }
   }, []);
 
   return (

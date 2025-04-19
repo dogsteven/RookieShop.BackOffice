@@ -9,8 +9,6 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogHeader } f
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { ProblemDetails } from "@/app/services/api-client";
 
 const updateCategoryFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -19,8 +17,7 @@ const updateCategoryFormSchema = z.object({
 
 function UpdateCategoryForm() {
   const dispatch = useAppDispatch();
-  const { selectedCategory } = useAppSelector(state => state.categories);
-  const { isLoading } = useAppSelector(state => state.categories.status.updateCategory);
+  const { selectedCategory, isLoading: { updateCategory: isLoading } } = useAppSelector(state => state.categories);
 
   const [categoryName, setCategoryName] = useState<string | undefined>(undefined);
 
@@ -43,20 +40,11 @@ function UpdateCategoryForm() {
 
   const onSubmit = useCallback(async (values: z.infer<typeof updateCategoryFormSchema>) => {
     if (selectedCategory) {
-      const action = await dispatch(updateCategory({
+      dispatch(updateCategory({
         id: selectedCategory.id,
         name: values.name,
         description: values.description
       }));
-
-      if (action.type == updateCategory.fulfilled.type) {
-        dispatch(unselectCategory());
-      } else if (action.type == updateCategory.rejected.type) {
-        const problemDetails = action.payload as ProblemDetails;
-        toast.error(problemDetails.title, {
-          description: problemDetails.detail
-        });
-      }
     }
   }, [selectedCategory]);
 

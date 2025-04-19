@@ -11,8 +11,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner";
-import { ProblemDetails } from "@/app/services/api-client";
 
 const updateProductFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -26,8 +24,7 @@ const updateProductFormSchema = z.object({
 function UpdateProductForm() {
   const dispatch = useAppDispatch();
   const { categories } = useAppSelector(state => state.categories);
-  const { selectedProduct } = useAppSelector(state => state.products);
-  const { isLoading } = useAppSelector(state => state.products.status.updateProduct);
+  const { selectedProduct, isLoading: { updateProduct: isLoading } } = useAppSelector(state => state.products);
 
   const [productSku, setProductSku] = useState<string | undefined>(undefined);
 
@@ -57,7 +54,7 @@ function UpdateProductForm() {
 
   const onSubmit = useCallback(async (values: z.infer<typeof updateProductFormSchema>) => {
     if (selectedProduct) {
-      const action = await dispatch(updateProduct({
+      dispatch(updateProduct({
         sku: selectedProduct.sku,
         name: values.name,
         description: values.description,
@@ -66,15 +63,6 @@ function UpdateProductForm() {
         imageUrl: values.imageUrl,
         isFeatured: values.isFeatured
       }));
-
-      if (action.type == updateProduct.fulfilled.type) {
-        dispatch(unselectProduct());
-      } else if (action.type == updateProduct.rejected.type) {
-        const problemDetails = action.payload as ProblemDetails;
-        toast.error(problemDetails.title, {
-          description: problemDetails.detail
-        });
-      }
     }
   }, [selectedProduct]);
   

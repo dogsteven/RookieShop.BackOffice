@@ -1,40 +1,50 @@
 import CategoryDto from "@/app/models/category-dto";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ExtraArguments, RootState } from "../store";
-import { ProblemDetailsError } from "@/app/services/api-client";
+import { ProblemDetails, ProblemDetailsError } from "@/app/services/api-client";
 
-export interface Status {
-  isLoading: boolean
-}
-
-export interface CategoriesState {
+interface CategoriesState {
   categories: CategoryDto[]
-  status: {
-    fetchCategories: Status,
-    createCategory: Status,
-    updateCategory: Status,
-    deleteCategory: Status
-  }
   selectedCategory?: CategoryDto
+
+  isLoading: {
+    fetchCategories: boolean
+    createCategory: boolean
+    updateCategory: boolean
+    deleteCategory: boolean
+  }
+  error?: {
+    title: string
+    detail: string
+  }
 }
 
 const initialState: CategoriesState = {
   categories: [],
-  status: {
-    fetchCategories: {
-      isLoading: false
-    },
-    createCategory: {
-      isLoading: false
-    },
-    updateCategory: {
-      isLoading: false
-    },
-    deleteCategory: {
-      isLoading: false
-    }
+  
+  isLoading: {
+    fetchCategories: false,
+    createCategory: false,
+    updateCategory: false,
+    deleteCategory: false
   }
 };
+
+
+interface CreateCategoryModel {
+  name: string
+  description: string
+}
+
+interface UpdateCategoryModel {
+  id: number
+  name: string
+  description: string
+}
+
+interface DeleteCategoryModel {
+  id: number
+}
 
 export const fetchCategories = createAsyncThunk<CategoryDto[], void, { extra: ExtraArguments, state: RootState }>("categories/fetchCategories", async (_, thunkApi) => {
   const categoryService = thunkApi.extra.categoryService;
@@ -46,16 +56,12 @@ export const fetchCategories = createAsyncThunk<CategoryDto[], void, { extra: Ex
   }
 });
 
-export interface CreateCategoryModel {
-  name: string
-  description: string
-}
 
 export const createCategory = createAsyncThunk<CategoryDto, CreateCategoryModel, { extra: ExtraArguments, state: RootState }>("categories/createCategory", async (model, thunkApi) => {
   const categoryService = thunkApi.extra.categoryService;
 
   try {
-    const { id } = await categoryService.createCategory(model.name, model.description);
+    const id = await categoryService.createCategory(model.name, model.description);
 
     return {
       id: id,
@@ -66,12 +72,6 @@ export const createCategory = createAsyncThunk<CategoryDto, CreateCategoryModel,
     return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
   }
 });
-
-export interface UpdateCategoryModel {
-  id: number
-  name: string
-  description: string
-}
 
 export const updateCategory = createAsyncThunk<CategoryDto, UpdateCategoryModel, { extra: ExtraArguments, state: RootState }>("categories/updateCategory", async (model, thunkApi) => {
   const categoryService = thunkApi.extra.categoryService;
@@ -88,10 +88,6 @@ export const updateCategory = createAsyncThunk<CategoryDto, UpdateCategoryModel,
     return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
   }
 });
-
-export interface DeleteCategoryModel {
-  id: number
-}
 
 export const deleteCategory = createAsyncThunk<number, DeleteCategoryModel, { extra: ExtraArguments, state: RootState }>("categories/deleteCategory", async (model, thunkApi) => {
   const categoryService = thunkApi.extra.categoryService;
@@ -115,36 +111,56 @@ const categoriesSlice = createSlice({
 
     unselectCategory: (state) => {
       state.selectedCategory = undefined;
+    },
+
+    clearError: (state) => {
+      state.error = undefined;
     }
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchCategories.pending, (state) => {
-        state.status.fetchCategories.isLoading = true;
+        state.isLoading.fetchCategories = true;
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.categories = action.payload;
-        state.status.fetchCategories.isLoading = false;
+        
+        state.isLoading.fetchCategories = false;
       })
-      .addCase(fetchCategories.rejected, (state) => {
-        state.status.fetchCategories.isLoading = false;
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.isLoading.fetchCategories = false;
+        
+        const payload = action.payload as ProblemDetails;
+
+        state.error = {
+          title: payload.title,
+          detail: payload.detail
+        };
       });
     
     builder
       .addCase(createCategory.pending, (state) => {
-        state.status.createCategory.isLoading = true;
+        state.isLoading.createCategory = true;
       })
       .addCase(createCategory.fulfilled, (state, action) => {
         state.categories.unshift(action.payload);
-        state.status.createCategory.isLoading = false;
+        
+        state.isLoading.createCategory = false;
       })
-      .addCase(createCategory.rejected, (state) => {
-        state.status.createCategory.isLoading = false;
+      .addCase(createCategory.rejected, (state, action) => {
+        state.isLoading.createCategory = false;
+        
+        const payload = action.payload as ProblemDetails;
+
+        state.error = {
+          title: payload.title,
+          detail: payload.detail
+        };
       });
       
     builder
       .addCase(updateCategory.pending, (state) => {
-        state.status.updateCategory.isLoading = true;
+        state.isLoading.updateCategory = true;
       })
       .addCase(updateCategory.fulfilled, (state, action) => {
         const index = state.categories.findIndex((category) => category.id == action.payload.id);
@@ -156,15 +172,22 @@ const categoriesSlice = createSlice({
           category.description = action.payload.description; 
         }
 
-        state.status.updateCategory.isLoading = false;
+        state.isLoading.updateCategory = false;
       })
-      .addCase(updateCategory.rejected, (state) => {
-        state.status.updateCategory.isLoading = false;
+      .addCase(updateCategory.rejected, (state, action) => {
+        state.isLoading.updateCategory = false;
+        
+        const payload = action.payload as ProblemDetails;
+
+        state.error = {
+          title: payload.title,
+          detail: payload.detail
+        };
       });
     
     builder
       .addCase(deleteCategory.pending, (state) => {
-        state.status.deleteCategory.isLoading = true;
+        state.isLoading.deleteCategory = true;
       })
       .addCase(deleteCategory.fulfilled, (state, action) => {
         const index = state.categories.findIndex((category) => category.id == action.payload);
@@ -173,15 +196,22 @@ const categoriesSlice = createSlice({
           state.categories.splice(index, 1);
         }
 
-        state.status.deleteCategory.isLoading = false;      
+        state.isLoading.deleteCategory = false;
       })
-      .addCase(deleteCategory.rejected, (state) => {
-        state.status.deleteCategory.isLoading = false;
+      .addCase(deleteCategory.rejected, (state, action) => {
+        state.isLoading.deleteCategory = false;
+        
+        const payload = action.payload as ProblemDetails;
+
+        state.error = {
+          title: payload.title,
+          detail: payload.detail
+        };
       });
   }
 });
 
-export const { selectCategory, unselectCategory } = categoriesSlice.actions;
+export const { selectCategory, unselectCategory, clearError } = categoriesSlice.actions;
 
 const categoriesReducer = categoriesSlice.reducer;
 
