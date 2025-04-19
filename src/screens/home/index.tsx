@@ -1,26 +1,20 @@
-import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 import { useAuth } from "react-oidc-context";
+import { useNavigate } from "react-router";
 
 function Home() {
   const auth = useAuth();
+  const navigate = useNavigate();
 
-  if (auth.isAuthenticated) {
-    return (
-      <>
-        <Button onClick={() => auth.signoutRedirect()}>
-          Sign out
-        </Button>
-
-        {auth.user?.access_token}
-      </>
-    );
-  }
+  useEffect(() => {
+    if (!auth.isAuthenticated) {
+      navigate("/products");
+    }
+  }, [auth, navigate]);
 
   return (
-    <Button onClick={() => auth.signinRedirect()}>
-      Sign in
-    </Button>
-  )
+    <></>
+  );
 }
 
 export default Home;

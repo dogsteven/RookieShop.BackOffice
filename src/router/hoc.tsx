@@ -7,13 +7,15 @@ function withAdministrativeRequirement<Props extends object>(Component: React.FC
     const auth = useAuth();
     const navigate = useNavigate();
 
-    const roles = auth.user!.profile!.roles as string[];
-
     useEffect(() => {
-      if (!roles.includes("admin")) {
-        navigate("/");
+      if (auth.user?.profile?.roles) {
+        const roles = auth.user.profile.roles as string[];
+        
+        if (!roles.includes("admin")) {
+          navigate("/unauthorized-error");
+        }
       }
-    }, [roles]);
+    }, [auth, navigate]);
 
     return <Component {...props} />
   };

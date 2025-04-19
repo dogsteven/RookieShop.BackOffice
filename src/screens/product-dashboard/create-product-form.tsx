@@ -40,7 +40,7 @@ function CreateProductForm() {
   });
 
   const onSubmit = useCallback(async (values: z.infer<typeof createProductFormSchema>) => {
-    dispatch(createProduct({
+    const action = await dispatch(createProduct({
       sku: values.sku,
       name: values.name,
       description: values.description,
@@ -49,6 +49,10 @@ function CreateProductForm() {
       imageUrl: values.imageUrl,
       isFeatured: values.isFeatured
     }));
+
+    if (action.type == createProduct.fulfilled.type) {
+      form.reset();
+    }
   }, []);
 
   return (

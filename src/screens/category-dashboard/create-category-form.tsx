@@ -28,10 +28,14 @@ function CreateCategoryForm() {
   });
 
   const onSubmit = useCallback(async (values: z.infer<typeof createCategoryFormSchema>) => {
-    dispatch(createCategory({
+    const action = await dispatch(createCategory({
       name: values.name,
       description: values.description
     }));
+
+    if (action.type == createCategory.fulfilled.type) {
+      form.reset();
+    }
   }, []);
 
   return (
