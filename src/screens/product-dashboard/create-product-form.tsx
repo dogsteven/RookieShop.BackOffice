@@ -18,7 +18,7 @@ const createProductFormSchema = z.object({
   description: z.string().min(0).max(1000),
   price: z.coerce.number().positive(),
   categoryId: z.string({ required_error: "Please select an category." }),
-  imageUrl: z.string().url().min(1).max(500),
+  primaryImageId: z.string().min(1),
   isFeatured: z.boolean()
 });
 
@@ -34,7 +34,7 @@ function CreateProductForm() {
       name: "",
       description: "",
       price: 0.0,
-      imageUrl: "",
+      primaryImageId: "",
       isFeatured: false
     }
   });
@@ -46,14 +46,14 @@ function CreateProductForm() {
       description: values.description,
       price: values.price,
       categoryId: parseInt(values.categoryId),
-      imageUrl: values.imageUrl,
+      primaryImageId: values.primaryImageId,
       isFeatured: values.isFeatured
     }));
 
     if (action.type == createProduct.fulfilled.type) {
       form.reset();
     }
-  }, []);
+  }, [form]);
 
   return (
     <Dialog
@@ -179,15 +179,15 @@ function CreateProductForm() {
               <div className="col-span-2">
                 <FormField
                   control={form.control}
-                  name="imageUrl"
+                  name="primaryImageId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Image Url</FormLabel>
+                      <FormLabel>Primary image id</FormLabel>
                       <FormControl>
                         <Input placeholder="" {...field} disabled={isLoading} />
                       </FormControl>
                       <FormDescription>
-                        The image url of the product
+                        The id of the primary image of this product
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

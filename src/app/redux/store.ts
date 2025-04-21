@@ -6,19 +6,23 @@ import CategoryService, { CategoryApiService } from "../services/category-servic
 import categoriesReducer from "./categories/categories-slice";
 import CustomerService, { CustomerApiService } from "../services/customer-service";
 import customersReducer from "./customers/customers-slice";
+import ImageGalleryService, { ImageGalleryApiService } from "../services/image-gallery-service";
+import imageGalleryReducer from "./image-gallery/image-gallery-slice";
 
 const store = configureStore({
   reducer: {
     products: productsReducer,
     categories: categoriesReducer,
-    customers: customersReducer
+    customers: customersReducer,
+    imageGallery: imageGalleryReducer
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({
     thunk: {
       extraArgument: {
         productService: new ProductApiService(rookieShopApiClient),
         categoryService: new CategoryApiService(rookieShopApiClient),
-        customerService: new CustomerApiService(rookieShopApiClient)
+        customerService: new CustomerApiService(rookieShopApiClient),
+        imageGalleryService: new ImageGalleryApiService(rookieShopApiClient)
       }
     }
   })
@@ -31,5 +35,6 @@ export type AppDispatch = typeof store.dispatch
 export type ExtraArguments = {
   productService: ProductService,
   categoryService: CategoryService,
-  customerService: CustomerService
+  customerService: CustomerService,
+  imageGalleryService: ImageGalleryService
 }

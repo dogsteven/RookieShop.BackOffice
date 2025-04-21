@@ -5,6 +5,6 @@ export default interface ProductDto {
   price: number
   categoryId: number
   categoryName: string
-  imageUrl: string
+  primaryImageId: string
   isFeatured: boolean
 }

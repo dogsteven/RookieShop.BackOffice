@@ -12,8 +12,18 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
 function CategoryDashboard() {
-  const { categories, error } = useAppSelector(state => state.categories);
+  const { categories, success, error } = useAppSelector(state => state.categories);
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (success) {
+      toast.success(success.title, {
+        description: success.detail
+      });
+
+      dispatch(clearError());
+    }
+  }, [success]);
 
   useEffect(() => {
     if (error) {
@@ -40,8 +50,8 @@ function CategoryDashboard() {
 
       <UpdateCategoryForm />
 
-      <div className="flex flex-col w-full">
-        <div className="m-4 w-full">
+      <div className="flex flex-col">
+        <div className="p-4 w-full">
           <ScrollArea>
             <Table className="w-full">
               <TableCaption>All categories of RookieShop</TableCaption>

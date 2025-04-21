@@ -8,6 +8,7 @@ import CustomerDashboard from "@/screens/customer-dashboard";
 import Home from "@/screens/home";
 import OidcCallback from "@/oidc/callback";
 import UnauthorizedErrorScreen from "@/screens/unauthorized-error";
+import ImageGalleryDashboard from "@/screens/image-gallery-dashboard";
 
 const router = createBrowserRouter([
   {
@@ -24,7 +25,13 @@ const router = createBrowserRouter([
   },
   {
     Component: withAuthenticationRequired(withAdministrativeRequirement(AppLayout), {
-      OnRedirecting: () => <div>Redirecting...</div>,
+      OnRedirecting: () => {
+        return (
+          <div className="flex flex-row w-full h-screen justify-center items-center">
+            Redirecting...
+          </div>
+        );
+      },
       signinRedirectArgs: {
         redirect_uri: `http://localhost:5173/products`
       }
@@ -42,6 +49,10 @@ const router = createBrowserRouter([
         path: "/customers",
         Component: CustomerDashboard
       },
+      {
+        path: "/image-gallery",
+        Component: ImageGalleryDashboard
+      }
     ]
   }
 ]);

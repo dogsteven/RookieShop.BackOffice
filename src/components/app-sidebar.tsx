@@ -34,6 +34,10 @@ const data = {
           title: "Customers",
           url: "/customers",
         },
+        {
+          title: "Image Gallery",
+          url: "/image-gallery"
+        }
       ],
     },
   ],

@@ -5,17 +5,17 @@ import { calculateNumberOfPages } from "@/lib/utils";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-separator";
 import CreateProductForm from "./create-product-form";
-import { clearError, deleteProduct, fetchProductPage, selectProduct, setCurrentPageNumber } from "@/app/redux/products/products-slice";
+import { clearError, clearSuccess, deleteProduct, fetchProductPage, selectProduct, setCurrentPageNumber } from "@/app/redux/products/products-slice";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import UpdateProductForm from "./update-product-form";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import RookieShopPagination from "@/components/rookie-shop-pagination";
+import { fetchCategories } from "@/app/redux/categories/categories-slice";
 
 function ProductDashboard() {
-  const { productCount, currentPageNumber, pageSize, products, error } = useAppSelector(state => state.products);
-  const { categories } = useAppSelector(state => state.categories);
+  const { productCount, currentPageNumber, pageSize, products, success, error } = useAppSelector(state => state.products);
 
   const dispatch = useAppDispatch();
 
@@ -29,6 +29,20 @@ function ProductDashboard() {
       pageSize: pageSize
     }));
   }, [currentPageNumber, pageSize]);
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, []);
+
+  useEffect(() => {
+    if (success) {
+      toast.success(success.title, {
+        description: success.detail
+      });
+
+      dispatch(clearSuccess());
+    }
+  }, [success]);
 
   useEffect(() => {
     if (error) {
@@ -53,7 +67,7 @@ function ProductDashboard() {
       <UpdateProductForm />
 
       <div className="flex flex-col w-full">
-        <div className="m-4 w-full">
+        <div className="p-4 w-full">
           <ScrollArea>
             <Table className="w-full">
               <TableCaption>All products of RookieShop</TableCaption>
@@ -73,18 +87,18 @@ function ProductDashboard() {
 
               <TableBody>
                 {products.map(product => {
-                  const categoryName = categories.find((category) => category.id == product.categoryId)?.name ?? "Empty";
+                  const primaryImageUrl = `http://localhost:5027/api/ImageGallery/${product.primaryImageId}`;
 
                   return (
                     <TableRow key={product.sku}>
                       <TableCell>{product.sku}</TableCell>
                       <TableCell>
-                        <img src={product.imageUrl} className="w-12 rounded-sm aspect-square object-cover" />
+                        <img src={primaryImageUrl} className="w-12 rounded-sm aspect-square object-cover" />
                       </TableCell>
                       <TableCell>{product.name}</TableCell>
                       <TableCell className="max-w-100 text-ellipsis overflow-hidden">{product.description}</TableCell>
                       <TableCell>{product.price}</TableCell>
-                      <TableCell>{categoryName}</TableCell>                    
+                      <TableCell>{product.categoryName}</TableCell>                    
                       <TableCell>{product.isFeatured ? "Yes" : "No"}</TableCell>
                       <TableCell>
                         <Button onClick={() => dispatch(selectProduct(product))}>Edit</Button>

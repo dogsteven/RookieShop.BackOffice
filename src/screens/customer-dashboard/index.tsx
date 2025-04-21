@@ -27,8 +27,8 @@ function CustomerDashboard() {
         <span className="mr-auto">Customers</span>
       </header>
 
-      <div className="flex flex-col w-full">
-        <div className="m-4 w-full">
+      <div className="flex flex-col">
+        <div className="p-4 w-full">
           <ScrollArea>
             <Table className="w-full">
               <TableCaption>All customers of RookieShop</TableCaption>

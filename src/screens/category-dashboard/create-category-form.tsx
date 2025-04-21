@@ -36,7 +36,7 @@ function CreateCategoryForm() {
     if (action.type == createCategory.fulfilled.type) {
       form.reset();
     }
-  }, []);
+  }, [form]);
 
   return (
     <Dialog

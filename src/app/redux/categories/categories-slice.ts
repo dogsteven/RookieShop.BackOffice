@@ -13,6 +13,12 @@ interface CategoriesState {
     updateCategory: boolean
     deleteCategory: boolean
   }
+
+  success?: {
+    title: string
+    detail: string
+  }
+
   error?: {
     title: string
     detail: string
@@ -113,6 +119,10 @@ const categoriesSlice = createSlice({
       state.selectedCategory = undefined;
     },
 
+    clearSuccess: (state) => {
+      state.success = undefined;
+    },
+
     clearError: (state) => {
       state.error = undefined;
     }
@@ -146,6 +156,11 @@ const categoriesSlice = createSlice({
         state.categories.unshift(action.payload);
         
         state.isLoading.createCategory = false;
+
+        state.success = {
+          title: "Success",
+          detail: "Category was successfully added"
+        };
       })
       .addCase(createCategory.rejected, (state, action) => {
         state.isLoading.createCategory = false;
@@ -173,6 +188,11 @@ const categoriesSlice = createSlice({
         }
 
         state.isLoading.updateCategory = false;
+
+        state.success = {
+          title: "Success",
+          detail: "Category was successfully updated"
+        };
       })
       .addCase(updateCategory.rejected, (state, action) => {
         state.isLoading.updateCategory = false;
@@ -197,6 +217,11 @@ const categoriesSlice = createSlice({
         }
 
         state.isLoading.deleteCategory = false;
+
+        state.success = {
+          title: "Success",
+          detail: "Category was successfully deleted"
+        };
       })
       .addCase(deleteCategory.rejected, (state, action) => {
         state.isLoading.deleteCategory = false;
@@ -211,7 +236,7 @@ const categoriesSlice = createSlice({
   }
 });
 
-export const { selectCategory, unselectCategory, clearError } = categoriesSlice.actions;
+export const { selectCategory, unselectCategory, clearSuccess, clearError } = categoriesSlice.actions;
 
 const categoriesReducer = categoriesSlice.reducer;
 

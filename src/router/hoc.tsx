@@ -15,6 +15,8 @@ function withAdministrativeRequirement<Props extends object>(Component: React.FC
           navigate("/unauthorized-error");
         }
       }
+
+      console.log(auth.user?.access_token);
     }, [auth, navigate]);
 
     return <Component {...props} />

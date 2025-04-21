@@ -18,6 +18,11 @@ interface ProductsState {
     deleteProduct: boolean
   }
 
+  success?: {
+    title: string,
+    detail: string
+  }
+
   error?: {
     title: string
     detail: string
@@ -49,7 +54,7 @@ interface CreateProductModel {
   description: string
   price: number
   categoryId: number
-  imageUrl: string
+  primaryImageId: string
   isFeatured: boolean
 }
 
@@ -59,7 +64,7 @@ interface UpdateProductModel {
   description: string
   price: number
   categoryId: number
-  imageUrl: string
+  primaryImageId: string
   isFeatured: boolean
 }
 
@@ -83,7 +88,7 @@ export const createProduct = createAsyncThunk<void, CreateProductModel, { extra:
   const state = thunkApi.getState().products;
 
   try {
-    await productService.createProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.imageUrl, model.isFeatured);
+    await productService.createProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.primaryImageId, model.isFeatured);
 
     await dispatch(fetchProductPage({
       pageNumber: 1,
@@ -100,7 +105,7 @@ export const updateProduct = createAsyncThunk<void, UpdateProductModel, { extra:
   const state = thunkApi.getState().products;
 
   try {
-    await productService.updateProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.imageUrl, model.isFeatured);
+    await productService.updateProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.primaryImageId, model.isFeatured);
 
     await dispatch(fetchProductPage({
       pageNumber: 1,
@@ -144,6 +149,10 @@ const productsSlice = createSlice({
       state.selectedProduct = undefined;
     },
 
+    clearSuccess: (state) => {
+      state.success = undefined;
+    },
+
     clearError: (state) => {
       state.error = undefined;
     }
@@ -178,6 +187,11 @@ const productsSlice = createSlice({
       })
       .addCase(createProduct.fulfilled, (state) => {
         state.isLoading.createProduct = false;
+
+        state.success = {
+          title: "Success",
+          detail: "Product was successfully added"
+        };
       })
       .addCase(createProduct.rejected, (state, action) => {
         state.isLoading.createProduct = false;
@@ -196,6 +210,11 @@ const productsSlice = createSlice({
       })
       .addCase(updateProduct.fulfilled, (state) => {
         state.isLoading.updateProduct = false;
+
+        state.success = {
+          title: "Success",
+          detail: "Product was successfully updated"
+        };
       })
       .addCase(updateProduct.rejected, (state, action) => {
         state.isLoading.updateProduct = false;
@@ -214,6 +233,11 @@ const productsSlice = createSlice({
       })
       .addCase(deleteProduct.fulfilled, (state) => {
         state.isLoading.deleteProduct = false;
+
+        state.success = {
+          title: "Success",
+          detail: "Product was successfully deleted"
+        };
       })
       .addCase(deleteProduct.rejected, (state, action) => {
         state.isLoading.deleteProduct = false;
@@ -233,6 +257,7 @@ export const {
   setCurrentPageNumber,
   selectProduct,
   unselectProduct,
+  clearSuccess,
   clearError
 } = productsSlice.actions;
 

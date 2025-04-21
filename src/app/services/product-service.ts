@@ -5,8 +5,8 @@ import ApiClient from "./api-client";
 export default interface ProductService {
   getProductBySku(sku: string) : Promise<ProductDto>;
   getProducts(pageNumber: number, pageSize: number) : Promise<Pagination<ProductDto>>;
-  createProduct(sku: string, name: string, description: string, price: number, categoryId: number, imageUrl: string, isFeatured: boolean) : Promise<void>
-  updateProduct(sku: string, name: string, description: string, price: number, categoryId: number, imageUrl: string, isFeatured: boolean) : Promise<void>
+  createProduct(sku: string, name: string, description: string, price: number, categoryId: number, primaryImageId: string, isFeatured: boolean) : Promise<void>
+  updateProduct(sku: string, name: string, description: string, price: number, categoryId: number, primaryImageId: string, isFeatured: boolean) : Promise<void>
   deleteProduct(sku: string) : Promise<void>
 }
 
@@ -30,25 +30,25 @@ export class ProductApiService implements ProductService {
     });
   }
 
-  public async createProduct(sku: string, name: string, description: string, price: number, categoryId: number, imageUrl: string, isFeatured: boolean): Promise<void> {
+  public async createProduct(sku: string, name: string, description: string, price: number, categoryId: number, primaryImageId: string, isFeatured: boolean): Promise<void> {
     await this.client.post("/api/Product", {
       sku: sku,
       name: name,
       description: description,
       price: price,
       categoryId: categoryId,
-      imageUrl: imageUrl,
+      primaryImageId: primaryImageId,
       isFeatured: isFeatured
     });
   }
 
-  public async updateProduct(sku: string, name: string, description: string, price: number, categoryId: number, imageUrl: string, isFeatured: boolean): Promise<void> {
+  public async updateProduct(sku: string, name: string, description: string, price: number, categoryId: number, primaryImageId: string, isFeatured: boolean): Promise<void> {
     await this.client.put(`/api/Product/${sku}`, {
       name: name,
       description: description,
       price: price,
       categoryId: categoryId,
-      imageUrl: imageUrl,
+      primaryImageId: primaryImageId,
       isFeatured: isFeatured
     });
   }

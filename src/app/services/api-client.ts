@@ -56,6 +56,8 @@ export default class ApiClient {
         }
       }
 
+      console.error(error);
+
       throw new ProblemDetailsError(error.response.data);
     });
   }
