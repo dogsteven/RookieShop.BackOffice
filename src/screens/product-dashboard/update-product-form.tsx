@@ -11,6 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { fetchCategories } from "@/app/redux/categories/categories-slice";
+import ImageSelection from "./image-selection";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const updateProductFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -27,6 +31,10 @@ function UpdateProductForm() {
   const { selectedProduct, isLoading: { updateProduct: isLoading } } = useAppSelector(state => state.products);
 
   const [productSku, setProductSku] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, []);
 
   const form = useForm<z.infer<typeof updateProductFormSchema>>({
     resolver: zodResolver(updateProductFormSchema),
@@ -84,129 +92,146 @@ function UpdateProductForm() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 flex flex-col">
-            <div className="grid grid-cols-2 gap-4 items-start">
-              <div className="col-span-2">
+            <ScrollArea className="max-h-[75vh]">
+              <div className="grid grid-cols-2 gap-4 items-start">
+                <div className="col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Gucci T-shirt" {...field} disabled={isLoading} />
+                        </FormControl>
+                        <FormDescription>
+                          The display name of the product
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea rows={3} placeholder="" {...field} disabled={isLoading} />
+                        </FormControl>
+                        <FormDescription>
+                          The description of the product
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>Price</FormLabel>
                       <FormControl>
-                        <Input placeholder="Gucci T-shirt" {...field} disabled={isLoading} />
+                        <Input type="number" placeholder="10.00" {...field} disabled={isLoading} />
                       </FormControl>
                       <FormDescription>
-                        The display name of the product
+                        The sell price of the product
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <div className="col-span-2">
                 <FormField
                   control={form.control}
-                  name="description"
+                  name="categoryId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Category</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="" {...field} disabled={isLoading} />
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Categories</SelectLabel>
+                              {categories.map(category => {
+                                return (
+                                  <SelectItem key={category.id} value={`${category.id}`}>{category.name}</SelectItem>
+                                );
+                              })}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormDescription>
-                        The description of the product
+                        The category of the product
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                <div className="col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="primaryImageId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Primary image</FormLabel>
+                        <FormControl>
+                          <Sheet>
+                            <SheetTrigger asChild>
+                              <div className="flex flex-row max-h-40 p-4 justify-between items-center border-dashed border rounded-md cursor-pointer">
+                                {field.value && <img src={`http://localhost:5027/api/ImageGallery/${field.value}`} className="h-full aspect-square object-cover cursor-pointer rounded-md"/>}
+                                <span className="mx-auto">{field.value ? "Select another image" : "Select image"}</span>
+                              </div>
+                            </SheetTrigger>
+                            <SheetContent>
+                              <SheetHeader>
+                                <SheetTitle>Image Gallery</SheetTitle>
+                              </SheetHeader>
+
+                              <ImageSelection selectedId={field.value} onSelect={field.onChange} />
+                            </SheetContent>
+                          </Sheet>
+                        </FormControl>
+                        <FormDescription>
+                          The primary image of this product
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="isFeatured"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row justify-start content-center space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} disabled={isLoading} />
+                        </FormControl>
+                        <FormLabel>
+                          Is the product featured?
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="10.00" {...field} disabled={isLoading} />
-                    </FormControl>
-                    <FormDescription>
-                      The sell price of the product
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="categoryId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Categories</SelectLabel>
-                            {categories.map(category => {
-                              return (
-                                <SelectItem key={category.id} value={`${category.id}`}>{category.name}</SelectItem>
-                              );
-                            })}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormDescription>
-                      The category of the product
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="col-span-2">
-                <FormField
-                  control={form.control}
-                  name="primaryImageId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Primary image id</FormLabel>
-                      <FormControl>
-                        <Input placeholder="" {...field} disabled={isLoading} />
-                      </FormControl>
-                      <FormDescription>
-                        The id of the primary image of this product
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="col-span-2">
-                <FormField
-                  control={form.control}
-                  name="isFeatured"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row justify-start content-center space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} disabled={isLoading} />
-                      </FormControl>
-                      <FormLabel>
-                        Is the product featured?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
+            </ScrollArea>
 
             <Button type="submit" disabled={isLoading}>Submit</Button>
           </form>

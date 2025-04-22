@@ -12,12 +12,14 @@ import UpdateProductForm from "./update-product-form";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import RookieShopPagination from "@/components/rookie-shop-pagination";
-import { fetchCategories } from "@/app/redux/categories/categories-slice";
+import { useNavigate } from "react-router";
 
 function ProductDashboard() {
   const { productCount, currentPageNumber, pageSize, products, success, error } = useAppSelector(state => state.products);
 
   const dispatch = useAppDispatch();
+
+  const navigate = useNavigate();
 
   const numberOfPages = useMemo(() => {
     return calculateNumberOfPages(pageSize, productCount);
@@ -29,10 +31,6 @@ function ProductDashboard() {
       pageSize: pageSize
     }));
   }, [currentPageNumber, pageSize]);
-
-  useEffect(() => {
-    dispatch(fetchCategories());
-  }, []);
 
   useEffect(() => {
     if (success) {
@@ -61,6 +59,14 @@ function ProductDashboard() {
         <Separator orientation="vertical" className="mr-4 h-4" />
         <span className="mr-auto">Products</span>
 
+        {/* <Button
+          type="button"
+          onClick={() => {
+            navigate("/products/create");
+          }}
+        >
+          Create Product
+        </Button> */}
         <CreateProductForm />
       </header>
 
