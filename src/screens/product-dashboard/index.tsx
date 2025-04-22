@@ -1,36 +1,37 @@
-import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
-import { useEffect, useMemo } from "react";
+import { useAppDispatch, useAppSelector, useFetchProductPageByPageNumber } from "@/app/redux/hook";
+import { useEffect } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { calculateNumberOfPages } from "@/lib/utils";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-separator";
 import CreateProductForm from "./create-product-form";
-import { clearError, clearSuccess, deleteProduct, fetchProductPage, selectProduct, setCurrentPageNumber } from "@/app/redux/products/products-slice";
+import { clearError, clearSuccess, deleteProduct, fetchProductPage, selectProduct } from "@/app/redux/products/products-slice";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import UpdateProductForm from "./update-product-form";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import RookieShopPagination from "@/components/rookie-shop-pagination";
-import { useNavigate } from "react-router";
+import { fetchCategories } from "@/app/redux/categories/categories-slice";
+import { fetchImagePage } from "@/app/redux/image-gallery/image-gallery-slice";
 
 function ProductDashboard() {
-  const { productCount, currentPageNumber, pageSize, products, success, error } = useAppSelector(state => state.products);
+  const { productCount, currentPageNumber, pageSize, products, success, error, isLoading: { fetchProductPage: isLoading } } = useAppSelector(state => state.products);
 
   const dispatch = useAppDispatch();
-
-  const navigate = useNavigate();
-
-  const numberOfPages = useMemo(() => {
-    return calculateNumberOfPages(pageSize, productCount);
-  }, [productCount, pageSize]);
+  
+  const fetctProductPageByPageNumber = useFetchProductPageByPageNumber();
 
   useEffect(() => {
-    dispatch(fetchProductPage({
-      pageNumber: currentPageNumber,
-      pageSize: pageSize
-    }));
-  }, [currentPageNumber, pageSize]);
+    dispatch(fetchProductPage({ pageNumber: 1, pageSize: 9 }));
+  }, []);
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, []);
+
+  useEffect(() => {
+    dispatch(fetchImagePage({ pageNumber: 1, pageSize: 9 }));
+  }, []);
 
   useEffect(() => {
     if (success) {
@@ -54,25 +55,17 @@ function ProductDashboard() {
   
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+      <header className="sticky top-0 z-50 bg-background flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-4 h-4" />
         <span className="mr-auto">Products</span>
 
-        {/* <Button
-          type="button"
-          onClick={() => {
-            navigate("/products/create");
-          }}
-        >
-          Create Product
-        </Button> */}
         <CreateProductForm />
       </header>
 
       <UpdateProductForm />
 
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full pb-4">
         <div className="p-4 w-full">
           <ScrollArea>
             <Table className="w-full">
@@ -132,14 +125,16 @@ function ProductDashboard() {
                 })}
               </TableBody>
             </Table>
-          <ScrollBar orientation="horizontal" />
+            <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </div>
         
         <RookieShopPagination
+          isLoading={isLoading}
+          itemCount={productCount}
           currentPageNumber={currentPageNumber}
-          numberOfPages={numberOfPages}
-          setCurrentPageNumber={(number) => dispatch(setCurrentPageNumber(number))}
+          pageSize={pageSize}
+          setCurrentPageNumber={fetctProductPageByPageNumber}
         />
       </div>
     </>

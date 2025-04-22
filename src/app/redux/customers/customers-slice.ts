@@ -1,5 +1,5 @@
 import CustomerDto from "@/app/models/customer-dto"
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { ExtraArguments, RootState } from "../store"
 import { ProblemDetails, ProblemDetailsError } from "@/app/services/api-client"
 
@@ -47,10 +47,6 @@ const customersSlice = createSlice({
   name: "customers",
   initialState: initialState,
   reducers: {
-    setCurrentPageNumber: (state, action: PayloadAction<number>) => {
-      state.currentPageNumber = action.payload;
-    },
-
     clearError: (state) => {
       state.error = undefined;
     }
@@ -78,7 +74,7 @@ const customersSlice = createSlice({
   }
 });
 
-export const { setCurrentPageNumber, clearError } = customersSlice.actions;
+export const { clearError } = customersSlice.actions;
 
 const customersReducer = customersSlice.reducer;
 

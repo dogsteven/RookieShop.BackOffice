@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
+import { useAppDispatch, useAppSelector, useFetchImagePageByPageNumber } from "@/app/redux/hook";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useEffect, useState } from "react";
@@ -6,20 +6,19 @@ import { toast } from "sonner";
 import UploadImageForm from "./upload-image-form";
 import { deleteImage, fetchImagePage } from "@/app/redux/image-gallery/image-gallery-slice";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import RookieShopPagination from "@/components/rookie-shop-pagination";
 
 function ImageGalleryDashboard() {
   const dispatch = useAppDispatch();
-  const { images, currentPageNumber, pageSize, error } = useAppSelector(state => state.imageGallery);
+  const { images, imageCount, currentPageNumber, pageSize, error, isLoading: { fetchImagePage: isLoading } } = useAppSelector(state => state.imageGallery);
+
+  const fetchImagePageByPageNumber = useFetchImagePageByPageNumber();
 
   useEffect(() => {
-    dispatch(fetchImagePage({
-      pageNumber: currentPageNumber,
-      pageSize: pageSize
-    }));
-  }, [currentPageNumber, pageSize]);
+    dispatch(fetchImagePage({ pageNumber: 1, pageSize: 12 }));
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -33,7 +32,7 @@ function ImageGalleryDashboard() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+      <header className="sticky top-0 z-50 bg-background flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-4 h-4" />
         <span className="mr-auto">Image Gallery</span>
@@ -93,6 +92,14 @@ function ImageGalleryDashboard() {
             );
           })}
         </div>
+
+        <RookieShopPagination
+          isLoading={isLoading}
+          itemCount={imageCount}
+          currentPageNumber={currentPageNumber}
+          pageSize={pageSize}
+          setCurrentPageNumber={fetchImagePageByPageNumber}
+        />
       </div>
     </>
   );

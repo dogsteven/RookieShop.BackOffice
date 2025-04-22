@@ -12,11 +12,3 @@ export function range(start: number, end: number): number[] {
 
   return [...Array(end - start + 1).keys()].map(index => index + start);
 }
-
-export function calculateNumberOfPages(pageSize: number, totalNumberOfItems: number): number {
-  if (totalNumberOfItems == 0) {
-    return 1;
-  }
-
-  return Math.ceil(totalNumberOfItems / pageSize);
-}

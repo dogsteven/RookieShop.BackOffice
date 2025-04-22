@@ -11,9 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { fetchCategories } from "@/app/redux/categories/categories-slice";
 import ImageSelection from "./image-selection";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const updateProductFormSchema = z.object({
@@ -31,10 +30,6 @@ function UpdateProductForm() {
   const { selectedProduct, isLoading: { updateProduct: isLoading } } = useAppSelector(state => state.products);
 
   const [productSku, setProductSku] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    dispatch(fetchCategories());
-  }, []);
 
   const form = useForm<z.infer<typeof updateProductFormSchema>>({
     resolver: zodResolver(updateProductFormSchema),
@@ -93,7 +88,7 @@ function UpdateProductForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 flex flex-col">
             <ScrollArea className="max-h-[75vh]">
-              <div className="grid grid-cols-2 gap-4 items-start">
+              <div className="grid grid-cols-2 gap-4 items-start p-1">
                 <div className="col-span-2">
                   <FormField
                     control={form.control}
@@ -198,6 +193,7 @@ function UpdateProductForm() {
                             <SheetContent>
                               <SheetHeader>
                                 <SheetTitle>Image Gallery</SheetTitle>
+                                <SheetDescription>Choose an image from Image Gallery</SheetDescription>
                               </SheetHeader>
 
                               <ImageSelection selectedId={field.value} onSelect={field.onChange} />

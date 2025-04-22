@@ -1,13 +1,32 @@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { range } from "@/lib/utils";
+import { useMemo } from "react";
 
-interface RookieShopPaginationProps {
-  currentPageNumber: number
-  numberOfPages?: number
-  setCurrentPageNumber: (pageNumber: number) => void
+function calculateNumberOfPages(pageSize: number, itemCount: number): number {
+  if (itemCount == 0) {
+    return 1;
+  }
+
+  return Math.ceil(itemCount / pageSize);
 }
 
-function RookieShopPagination({ currentPageNumber, numberOfPages, setCurrentPageNumber }: RookieShopPaginationProps) {
+interface RookieShopPaginationProps {
+  itemCount?: number
+  currentPageNumber: number
+  pageSize: number
+  isLoading: boolean
+  setCurrentPageNumber: ((pageNumber: number) => void) | ((pageNumber: number) => Promise<void>)
+}
+
+function RookieShopPagination({ itemCount, currentPageNumber, pageSize, setCurrentPageNumber }: RookieShopPaginationProps) {
+  const numberOfPages = useMemo<number | undefined>(() => {
+    if (!itemCount) {
+      return undefined;
+    }
+    
+    return calculateNumberOfPages(pageSize, itemCount);
+  }, [itemCount, pageSize]);
+
   if (numberOfPages) {
     return (
       <div className="flex flex-row content-center">

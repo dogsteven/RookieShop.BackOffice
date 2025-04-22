@@ -137,10 +137,6 @@ const productsSlice = createSlice({
   name: "products",
   initialState: initialState,
   reducers: {
-    setCurrentPageNumber: (state, action: PayloadAction<number>) => {
-      state.currentPageNumber = action.payload;
-    },
-
     selectProduct: (state, action: PayloadAction<ProductDto>) => {
       state.selectedProduct = action.payload;
     },
@@ -254,7 +250,6 @@ const productsSlice = createSlice({
 
 
 export const {
-  setCurrentPageNumber,
   selectProduct,
   unselectProduct,
   clearSuccess,

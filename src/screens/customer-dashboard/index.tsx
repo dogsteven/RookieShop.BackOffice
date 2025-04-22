@@ -1,27 +1,26 @@
-import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
+import { useAppDispatch, useAppSelector, useFetchCustomerPageByPageNumber } from "@/app/redux/hook";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { fetchCustomerPage, setCurrentPageNumber } from "@/app/redux/customers/customers-slice";
 import { useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import RookieShopPagination from "@/components/rookie-shop-pagination";
+import { fetchCustomerPage } from "@/app/redux/customers/customers-slice";
 
 function CustomerDashboard() {
   const dispatch = useAppDispatch();
-  const { customers, currentPageNumber, pageSize } = useAppSelector(state => state.customers);
+  const { customers, currentPageNumber, pageSize, isLoading: { fetchCustomerPage: isLoading } } = useAppSelector(state => state.customers);
   
+  const fetchCustomerPageByPageNumber = useFetchCustomerPageByPageNumber();
+
   useEffect(() => {
-    dispatch(fetchCustomerPage({
-      pageNumber: currentPageNumber,
-      pageSize: pageSize
-    }));
-  }, [currentPageNumber, pageSize]);
+    dispatch(fetchCustomerPage({ pageNumber: 1, pageSize: 12 }));
+  }, []);
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+      <header className="sticky top-0 z-50 bg-background flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-4 h-4" />
         <span className="mr-auto">Customers</span>
@@ -65,8 +64,10 @@ function CustomerDashboard() {
         </div>
 
         <RookieShopPagination
+          isLoading={isLoading}
           currentPageNumber={currentPageNumber}
-          setCurrentPageNumber={(number) => dispatch(setCurrentPageNumber(number))}
+          pageSize={pageSize}
+          setCurrentPageNumber={fetchCustomerPageByPageNumber}
         />
       </div>
     </>

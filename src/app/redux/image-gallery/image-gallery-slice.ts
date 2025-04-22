@@ -1,6 +1,6 @@
 import ImageDto from "@/app/models/image-dto"
 import Pagination from "@/app/models/pagination"
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { ExtraArguments, RootState } from "../store"
 import { ProblemDetails, ProblemDetailsError } from "@/app/services/api-client"
 
@@ -101,10 +101,6 @@ const imageGallerySlice = createSlice({
   name: "image-gallery",
   initialState: initialState,
   reducers: {
-    setCurrentPageNumber: (state, action: PayloadAction<number>) => {
-      state.currentPageNumber = action.payload;
-    },
-
     clearSuccess: (state) => {
       state.success = undefined;
     },
@@ -186,7 +182,6 @@ const imageGallerySlice = createSlice({
 });
 
 export const {
-  setCurrentPageNumber,
   clearSuccess,
   clearError
 } = imageGallerySlice.actions;

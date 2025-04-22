@@ -1,5 +1,6 @@
-import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
+import { useAppDispatch, useAppSelector, useFetchImagePageByPageNumber } from "@/app/redux/hook";
 import { fetchImagePage } from "@/app/redux/image-gallery/image-gallery-slice";
+import RookieShopPagination from "@/components/rookie-shop-pagination";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 
@@ -10,14 +11,16 @@ interface ImageSelectionProps {
 
 function ImageSelection(props: ImageSelectionProps) {
   const dispatch = useAppDispatch();
-  const { images, currentPageNumber, pageSize } = useAppSelector(state => state.imageGallery);
+  const { images, imageCount, currentPageNumber, pageSize, isLoading: { fetchImagePage: isLoading } } = useAppSelector(state => state.imageGallery);
+
+  const fetchImagePageByPageNumber = useFetchImagePageByPageNumber();
 
   useEffect(() => {
     dispatch(fetchImagePage({
       pageNumber: currentPageNumber,
       pageSize: pageSize
     }));
-  }, [currentPageNumber, pageSize]);
+  }, [currentPageNumber]);
 
   return (
     <div className="flex flex-col p-4">        
@@ -32,6 +35,14 @@ function ImageSelection(props: ImageSelectionProps) {
           );
         })}
       </div>
+
+      <RookieShopPagination
+        isLoading={isLoading}
+        itemCount={imageCount}
+        currentPageNumber={currentPageNumber}
+        pageSize={pageSize}
+        setCurrentPageNumber={fetchImagePageByPageNumber}
+      />
     </div>
   )
 }
