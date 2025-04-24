@@ -20,7 +20,7 @@ interface RookieShopPaginationProps {
 
 function RookieShopPagination({ itemCount, currentPageNumber, pageSize, setCurrentPageNumber }: RookieShopPaginationProps) {
   const numberOfPages = useMemo<number | undefined>(() => {
-    if (!itemCount) {
+    if (itemCount !== 0 && !itemCount) {
       return undefined;
     }
     

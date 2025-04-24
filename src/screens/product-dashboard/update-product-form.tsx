@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
 import { unselectProduct, updateProduct } from "@/app/redux/products/products-slice";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog";
@@ -11,9 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import ImageSelection from "./image-selection";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import ImageSelectionSheet from "./image-selection-sheet";
 
 const updateProductFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -21,6 +21,7 @@ const updateProductFormSchema = z.object({
   price: z.coerce.number().positive(),
   categoryId: z.string({ required_error: "Please select an category." }),
   primaryImageId: z.string().min(1),
+  supportingImageIds: z.set(z.string()),
   isFeatured: z.boolean()
 });
 
@@ -38,6 +39,7 @@ function UpdateProductForm() {
       description: "",
       price: 0.0,
       primaryImageId: "",
+      supportingImageIds: new Set<string>(),
       isFeatured: false
     }
   });
@@ -49,6 +51,7 @@ function UpdateProductForm() {
       form.setValue("price", selectedProduct.price);
       form.setValue("categoryId", `${selectedProduct.categoryId}`);
       form.setValue("primaryImageId", selectedProduct.primaryImageId);
+      form.setValue("supportingImageIds", new Set(selectedProduct.supportingImageIds));
       form.setValue("isFeatured", selectedProduct.isFeatured);
 
       setProductSku(selectedProduct.sku);
@@ -64,6 +67,7 @@ function UpdateProductForm() {
         price: values.price,
         categoryId: parseInt(values.categoryId),
         primaryImageId: values.primaryImageId,
+        supportingImageIds: values.supportingImageIds,
         isFeatured: values.isFeatured
       }));
     }
@@ -196,7 +200,7 @@ function UpdateProductForm() {
                                 <SheetDescription>Choose an image from Image Gallery</SheetDescription>
                               </SheetHeader>
 
-                              <ImageSelection selectedId={field.value} onSelect={field.onChange} />
+                              <ImageSelectionSheet onSubmit={field.onChange} />
                             </SheetContent>
                           </Sheet>
                         </FormControl>
@@ -206,6 +210,64 @@ function UpdateProductForm() {
                         <FormMessage />
                       </FormItem>
                     )}
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="supportingImageIds"
+                    render={({field}) => {
+                      const imageIds = useMemo(() => {
+                        return Array.from(field.value);
+                      }, [field.value]);
+
+                      return (
+                        <FormItem>
+                          <FormLabel>Supporting images</FormLabel>
+                          <FormControl>
+                            <ScrollArea>
+                              <div className="flex flex-row p-4 justify-start items-center gap-2 border-dashed border rounded-md">
+                                {imageIds.map((imageId) => {
+                                  return (
+                                    <img
+                                      key={imageId} src={`http://localhost:5027/api/ImageGallery/${imageId}`} className="h-20 aspect-square object-cover rounded-md cursor-pointer"
+                                      onClick={() => {
+                                        if (field.value.delete(imageId)) {
+                                          field.onChange(new Set(field.value));
+                                        }
+                                      }}
+                                    />
+                                  );
+                                })}
+
+                                <Sheet>
+                                  <SheetTrigger asChild>
+                                    <div className="flex flex-col h-20 aspect-square justify-center items-center border-dashed border rounded-md cursor-pointer">
+                                      Add
+                                    </div>
+                                  </SheetTrigger>
+                                  <SheetContent>
+                                    <SheetHeader>
+                                      <SheetTitle>Image Gallery</SheetTitle>
+                                      <SheetDescription>Choose an image from Image Gallery</SheetDescription>
+                                    </SheetHeader>
+
+                                    <ImageSelectionSheet onSubmit={(id) => field.onChange(field.value.add(id))} />
+                                  </SheetContent>
+                                </Sheet>
+                              </div>
+
+                              <ScrollBar orientation="horizontal" />
+                            </ScrollArea>
+                          </FormControl>
+                          <FormDescription>
+                            The supporting images of this product
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </div>
 

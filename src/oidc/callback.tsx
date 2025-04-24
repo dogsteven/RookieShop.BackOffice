@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { useAuth } from "react-oidc-context";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 function OidcCallback() {
   const auth = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (auth.isLoading) {
@@ -17,6 +18,7 @@ function OidcCallback() {
     }
 
     if (auth.isAuthenticated) {
+      window.history.replaceState({}, document.title, location.pathname);
       navigate("/products");
       return;
     }

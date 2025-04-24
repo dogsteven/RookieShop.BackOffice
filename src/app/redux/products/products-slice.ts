@@ -55,6 +55,7 @@ interface CreateProductModel {
   price: number
   categoryId: number
   primaryImageId: string
+  supportingImageIds: Set<string>
   isFeatured: boolean
 }
 
@@ -65,6 +66,7 @@ interface UpdateProductModel {
   price: number
   categoryId: number
   primaryImageId: string
+  supportingImageIds: Set<string>
   isFeatured: boolean
 }
 
@@ -88,7 +90,7 @@ export const createProduct = createAsyncThunk<void, CreateProductModel, { extra:
   const state = thunkApi.getState().products;
 
   try {
-    await productService.createProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.primaryImageId, model.isFeatured);
+    await productService.createProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.primaryImageId, model.supportingImageIds, model.isFeatured);
 
     await dispatch(fetchProductPage({
       pageNumber: 1,
@@ -105,7 +107,7 @@ export const updateProduct = createAsyncThunk<void, UpdateProductModel, { extra:
   const state = thunkApi.getState().products;
 
   try {
-    await productService.updateProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.primaryImageId, model.isFeatured);
+    await productService.updateProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.primaryImageId, model.supportingImageIds, model.isFeatured);
 
     await dispatch(fetchProductPage({
       pageNumber: 1,
