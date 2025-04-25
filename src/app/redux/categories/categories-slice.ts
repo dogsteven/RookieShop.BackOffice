@@ -1,11 +1,10 @@
 import CategoryDto from "@/app/models/category-dto";
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ExtraArguments, RootState } from "../store";
 import { ProblemDetails, ProblemDetailsError } from "@/app/services/api-client";
 
 interface CategoriesState {
   categories: CategoryDto[]
-  selectedCategory?: CategoryDto
 
   isLoading: {
     fetchCategories: boolean
@@ -111,14 +110,6 @@ const categoriesSlice = createSlice({
   name: "categories",
   initialState: initialState,
   reducers: {
-    selectCategory: (state, action: PayloadAction<CategoryDto>) => {
-      state.selectedCategory = action.payload;
-    },
-
-    unselectCategory: (state) => {
-      state.selectedCategory = undefined;
-    },
-
     clearSuccess: (state) => {
       state.success = undefined;
     },
@@ -236,7 +227,7 @@ const categoriesSlice = createSlice({
   }
 });
 
-export const { selectCategory, unselectCategory, clearSuccess, clearError } = categoriesSlice.actions;
+export const { clearSuccess, clearError } = categoriesSlice.actions;
 
 const categoriesReducer = categoriesSlice.reducer;
 

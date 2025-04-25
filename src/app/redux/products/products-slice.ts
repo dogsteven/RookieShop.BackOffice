@@ -1,6 +1,6 @@
 import Pagination from "@/app/models/pagination";
 import ProductDto from "@/app/models/product-dto";
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ExtraArguments, RootState } from "../store";
 import { ProblemDetails, ProblemDetailsError } from "@/app/services/api-client";
 
@@ -9,7 +9,6 @@ interface ProductsState {
   productCount: number
   currentPageNumber: number
   pageSize: number
-  selectedProduct?: ProductDto
 
   isLoading: {
     fetchProductPage: boolean
@@ -139,14 +138,6 @@ const productsSlice = createSlice({
   name: "products",
   initialState: initialState,
   reducers: {
-    selectProduct: (state, action: PayloadAction<ProductDto>) => {
-      state.selectedProduct = action.payload;
-    },
-
-    unselectProduct: (state) => {
-      state.selectedProduct = undefined;
-    },
-
     clearSuccess: (state) => {
       state.success = undefined;
     },
@@ -252,8 +243,6 @@ const productsSlice = createSlice({
 
 
 export const {
-  selectProduct,
-  unselectProduct,
   clearSuccess,
   clearError
 } = productsSlice.actions;

@@ -1,10 +1,10 @@
 import { useAppDispatch, useAppSelector, useFetchProductPageByPageNumber } from "@/app/redux/hook";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-separator";
 import CreateProductForm from "./create-product-form";
-import { clearError, clearSuccess, deleteProduct, fetchProductPage, selectProduct } from "@/app/redux/products/products-slice";
+import { clearError, clearSuccess, deleteProduct, fetchProductPage } from "@/app/redux/products/products-slice";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import UpdateProductForm from "./update-product-form";
@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import RookieShopPagination from "@/components/rookie-shop-pagination";
 import { fetchCategories } from "@/app/redux/categories/categories-slice";
 import { fetchImagePage } from "@/app/redux/image-gallery/image-gallery-slice";
+import ProductDto from "@/app/models/product-dto";
 
 function ProductDashboard() {
   const { productCount, currentPageNumber, pageSize, products, success, error, isLoading: { fetchProductPage: isLoading } } = useAppSelector(state => state.products);
@@ -53,17 +54,22 @@ function ProductDashboard() {
     }
   }, [error]);
   
+  const [createProductFormOpen, setCreateProductFormOpen] = useState(false);
+
+  const [selectedProduct, setSelectedProduct] = useState<ProductDto | undefined>(undefined);
+  
   return (
     <>
+      <CreateProductForm open={createProductFormOpen} setOpen={setCreateProductFormOpen} />
+      <UpdateProductForm selectedProduct={selectedProduct} unselectProduct={() => setSelectedProduct(undefined)} />
+
       <header className="sticky top-0 z-50 bg-background flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-4 h-4" />
         <span className="mr-auto">Products</span>
-
-        <CreateProductForm />
+        
+        <Button onClick={() => setCreateProductFormOpen(true)}>New Product</Button>
       </header>
-
-      <UpdateProductForm />
 
       <div className="flex flex-col w-full pb-4">
         <div className="p-4 w-full">
@@ -100,7 +106,7 @@ function ProductDashboard() {
                       <TableCell>{product.categoryName}</TableCell>                    
                       <TableCell>{product.isFeatured ? "Yes" : "No"}</TableCell>
                       <TableCell>
-                        <Button onClick={() => dispatch(selectProduct(product))}>Edit</Button>
+                        <Button onClick={() => setSelectedProduct(product)}>Edit</Button>
                       </TableCell>
                       <TableCell>
                         <AlertDialog>

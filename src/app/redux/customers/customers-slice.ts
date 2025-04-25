@@ -33,11 +33,17 @@ interface FetchCustomerPageModel {
   pageSize: number
 }
 
-export const fetchCustomerPage = createAsyncThunk<CustomerDto[], FetchCustomerPageModel, { extra: ExtraArguments, state: RootState }>("customers/fetchCustomerPage", async (model, thunkApi) => {
+export const fetchCustomerPage = createAsyncThunk<{ pageNumber: number, pageSize: number, customers: CustomerDto[] }, FetchCustomerPageModel, { extra: ExtraArguments, state: RootState }>("customers/fetchCustomerPage", async (model, thunkApi) => {
   const customerService = thunkApi.extra.customerService;
 
   try {
-    return await customerService.getCustomers(model.pageNumber, model.pageSize);
+    const customers = await customerService.getCustomers(model.pageNumber, model.pageSize);
+
+    return {
+      pageNumber: model.pageNumber,
+      pageSize: model.pageSize,
+      customers: customers
+    };
   } catch (error) {
     return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
   }
@@ -57,7 +63,9 @@ const customersSlice = createSlice({
         state.isLoading.fetchCustomerPage = true;
       })
       .addCase(fetchCustomerPage.fulfilled, (state, action) => {
-        state.customers = action.payload;
+        state.customers = action.payload.customers;
+        state.currentPageNumber = action.payload.pageNumber;
+        state.pageSize = action.payload.pageSize;
 
         state.isLoading.fetchCustomerPage = false;
       })

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import UploadImageForm from "./upload-image-form";
 import { deleteImage, fetchImagePage } from "@/app/redux/image-gallery/image-gallery-slice";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import RookieShopPagination from "@/components/rookie-shop-pagination";
@@ -30,42 +30,44 @@ function ImageGalleryDashboard() {
 
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
+  const [uploadImageFormOpen, setUploadImageFormOpen] = useState(false);
+  const [deleteImageDialogOpen, setDeleteImageDialogOpen] = useState(false);
+
   return (
     <>
+      <UploadImageForm open={uploadImageFormOpen} setOpen={setUploadImageFormOpen} />
+      
+      <AlertDialog open={deleteImageDialogOpen} onOpenChange={setDeleteImageDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>Are you sure you want to delete those images?</AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                await Promise.all(selectedImages.map(async (id) => {
+                  await dispatch(deleteImage({ id }));
+                }));
+
+                setSelectedImages([]);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <header className="sticky top-0 z-50 bg-background flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-4 h-4" />
         <span className="mr-auto">Image Gallery</span>
 
-        <UploadImageForm />
-        {(selectedImages.length > 0)
-        &&
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive">Delete</Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>Are you sure you want to delete those images?</AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={async () => {
-                  await Promise.all(selectedImages.map(async (id) => {
-                    await dispatch(deleteImage({ id }));
-                  }));
-
-                  setSelectedImages([]);
-                }}
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>}
+        <Button onClick={() => setUploadImageFormOpen(true)}>Upload Image</Button>
+        {selectedImages.length > 0 && <Button variant="destructive" onClick={() => setDeleteImageDialogOpen(true)}>Delete</Button>}
       </header>
       
       <div className="flex flex-col p-4">        

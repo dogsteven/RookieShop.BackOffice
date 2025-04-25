@@ -1,10 +1,10 @@
 import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
 import { uploadImage } from "@/app/redux/image-gallery/image-gallery-slice";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,12 @@ const uploadImageSchema = z.object({
     .refine((file) => file.size < 5 * 1024 * 1024, "File size must be less than 5MB")
 });
 
-function UploadImageForm() {
+interface UploadImageFormProps {
+  open: boolean
+  setOpen: (open: boolean) => void
+}
+
+function UploadImageForm({ open, setOpen }: UploadImageFormProps) {
   const dispatch = useAppDispatch();
   const { isLoading: { uploadImage: isLoading } } = useAppSelector(state => state.imageGallery);
 
@@ -25,8 +30,6 @@ function UploadImageForm() {
     resolver: zodResolver(uploadImageSchema),
     defaultValues: {}
   });
-
-  const [open, setOpen] = useState(false);
 
   const onSubmit = useCallback(async (values: z.infer<typeof uploadImageSchema>) => {
     const action = await dispatch(uploadImage({
@@ -49,9 +52,6 @@ function UploadImageForm() {
         }
       }}
     >
-      <DialogTrigger asChild>
-        <Button>Upload Image</Button>
-      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Upload image</DialogTitle>

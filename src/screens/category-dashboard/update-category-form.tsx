@@ -1,4 +1,4 @@
-import { unselectCategory, updateCategory } from "@/app/redux/categories/categories-slice";
+import { updateCategory } from "@/app/redux/categories/categories-slice";
 import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
@@ -9,15 +9,21 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogHeader } f
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import CategoryDto from "@/app/models/category-dto";
 
 const updateCategoryFormSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().min(1).max(250)
 });
 
-function UpdateCategoryForm() {
+interface UpdateCategoryFormProps {
+  selectedCategory: CategoryDto | undefined
+  unselectCategory: () => void
+}
+
+function UpdateCategoryForm({ selectedCategory, unselectCategory }: UpdateCategoryFormProps) {
   const dispatch = useAppDispatch();
-  const { selectedCategory, isLoading: { updateCategory: isLoading } } = useAppSelector(state => state.categories);
+  const { isLoading: { updateCategory: isLoading } } = useAppSelector(state => state.categories);
 
   const [categoryName, setCategoryName] = useState<string | undefined>(undefined);
 
@@ -54,7 +60,7 @@ function UpdateCategoryForm() {
       onOpenChange={(value) => {
         if (!value) {
           form.clearErrors();
-          dispatch(unselectCategory());
+          unselectCategory();
         }
       }}
     >

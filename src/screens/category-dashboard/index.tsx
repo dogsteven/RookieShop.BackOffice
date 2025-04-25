@@ -4,12 +4,13 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import CreateCategoryForm from "./create-category-form";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
-import { useEffect } from "react";
-import { clearError, deleteCategory, fetchCategories, selectCategory } from "@/app/redux/categories/categories-slice";
+import { useEffect, useState } from "react";
+import { clearError, deleteCategory, fetchCategories } from "@/app/redux/categories/categories-slice";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import UpdateCategoryForm from "./update-category-form";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import CategoryDto from "@/app/models/category-dto";
 
 function CategoryDashboard() {
   const { categories, success, error } = useAppSelector(state => state.categories);
@@ -39,16 +40,21 @@ function CategoryDashboard() {
     dispatch(fetchCategories());
   }, []);
 
+  const [createCategoryFormOpen, setCreateCategoryFormOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryDto | undefined>(undefined);
+
   return (
     <>
+      <CreateCategoryForm open={createCategoryFormOpen} setOpen={setCreateCategoryFormOpen} />
+      <UpdateCategoryForm selectedCategory={selectedCategory} unselectCategory={() => setSelectedCategory(undefined)} />
+
       <header className="sticky top-0 z-50 bg-background flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-4 h-4" />
         <span className="mr-auto">Categories</span>
-        <CreateCategoryForm />
+        
+        <Button onClick={() => setCreateCategoryFormOpen(true)}>New Category</Button>  
       </header>
-
-      <UpdateCategoryForm />
 
       <div className="flex flex-col">
         <div className="p-4 w-full">
@@ -72,7 +78,7 @@ function CategoryDashboard() {
                       <TableCell>{category.name}</TableCell>
                       <TableCell className="max-w-200 text-ellipsis overflow-hidden">{category.description}</TableCell>
                       <TableCell>
-                        <Button onClick={() => dispatch(selectCategory(category))}>Edit</Button>
+                        <Button onClick={() => setSelectedCategory(category)}>Edit</Button>
                       </TableCell>
                       <TableCell>
                         <AlertDialog>

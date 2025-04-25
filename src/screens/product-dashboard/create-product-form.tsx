@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
 import { createProduct } from "@/app/redux/products/products-slice";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -26,7 +26,12 @@ const createProductFormSchema = z.object({
   isFeatured: z.boolean()
 });
 
-function CreateProductForm() {
+interface CreateProductFormProps {
+  open: boolean
+  setOpen: (open: boolean) => void
+}
+
+function CreateProductForm({ open, setOpen }: CreateProductFormProps) {
   const dispatch = useAppDispatch();
   const { categories } = useAppSelector(state => state.categories);
   const { isLoading: { createProduct: isLoading } } = useAppSelector(state => state.products);
@@ -69,15 +74,15 @@ function CreateProductForm() {
 
   return (
     <Dialog
+      open={open}
       onOpenChange={(value) => {
         if (!value) {
           form.clearErrors();
         }
+
+        setOpen(value)
       }}
     >
-      <DialogTrigger asChild>
-        <Button>New Product</Button>
-      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>New product</DialogTitle>
@@ -236,12 +241,13 @@ function CreateProductForm() {
                         <FormItem>
                           <FormLabel>Supporting images</FormLabel>
                           <FormControl>
-                            <ScrollArea>
-                              <div className="flex flex-row p-4 justify-start items-center gap-2 border-dashed border rounded-md">
+                            <ScrollArea className="p-2 border-dashed border rounded-md">
+                              <div className="flex flex-row justify-start items-center gap-2">
                                 {imageIds.map((imageId) => {
                                   return (
                                     <img
-                                      key={imageId} src={`http://localhost:5027/api/ImageGallery/${imageId}`} className="h-20 aspect-square object-cover rounded-md cursor-pointer"
+                                      key={imageId}
+                                      src={`http://localhost:5027/api/ImageGallery/${imageId}`} className="h-20 aspect-square object-cover rounded-md cursor-pointer"
                                       onClick={() => {
                                         if (field.value.delete(imageId)) {
                                           field.onChange(new Set(field.value));

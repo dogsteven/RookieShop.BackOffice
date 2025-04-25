@@ -2,7 +2,7 @@ import { createCategory } from "@/app/redux/categories/categories-slice";
 import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +15,12 @@ const createCategoryFormSchema = z.object({
   description: z.string().min(1).max(250)
 });
 
-function CreateCategoryForm() {
+interface CreateCategoryFormProps {
+  open: boolean
+  setOpen: (open: boolean) => void
+}
+
+function CreateCategoryForm({ open, setOpen }: CreateCategoryFormProps) {
   const dispatch = useAppDispatch();
   const { isLoading: { createCategory: isLoading } } = useAppSelector(state => state.categories);
 
@@ -40,15 +45,15 @@ function CreateCategoryForm() {
 
   return (
     <Dialog
+      open={open}
       onOpenChange={(value) => {
         if (!value) {
           form.clearErrors();
         }
+
+        setOpen(value)
       }}
     >
-      <DialogTrigger asChild>
-        <Button>New Category</Button>
-      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>New category</DialogTitle>

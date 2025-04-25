@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/app/redux/hook";
-import { unselectProduct, updateProduct } from "@/app/redux/products/products-slice";
+import { updateProduct } from "@/app/redux/products/products-slice";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import ImageSelectionSheet from "./image-selection-sheet";
+import ProductDto from "@/app/models/product-dto";
 
 const updateProductFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -25,10 +26,15 @@ const updateProductFormSchema = z.object({
   isFeatured: z.boolean()
 });
 
-function UpdateProductForm() {
+interface UpdateProductFormProps {
+  selectedProduct: ProductDto | undefined
+  unselectProduct: () => void
+}
+
+function UpdateProductForm({ selectedProduct, unselectProduct }: UpdateProductFormProps) {
   const dispatch = useAppDispatch();
   const { categories } = useAppSelector(state => state.categories);
-  const { selectedProduct, isLoading: { updateProduct: isLoading } } = useAppSelector(state => state.products);
+  const { isLoading: { updateProduct: isLoading } } = useAppSelector(state => state.products);
 
   const [productSku, setProductSku] = useState<string | undefined>(undefined);
 
@@ -79,7 +85,7 @@ function UpdateProductForm() {
       onOpenChange={(value) => {
         if (!value) {
           form.clearErrors();
-          dispatch(unselectProduct());
+          unselectProduct();
         }
       }}
     >
@@ -226,12 +232,13 @@ function UpdateProductForm() {
                         <FormItem>
                           <FormLabel>Supporting images</FormLabel>
                           <FormControl>
-                            <ScrollArea>
-                              <div className="flex flex-row p-4 justify-start items-center gap-2 border-dashed border rounded-md">
+                            <ScrollArea className="border-dashed p-2 border rounded-md">
+                              <div className="flex flex-row justify-start items-center gap-2">
                                 {imageIds.map((imageId) => {
                                   return (
                                     <img
-                                      key={imageId} src={`http://localhost:5027/api/ImageGallery/${imageId}`} className="h-20 aspect-square object-cover rounded-md cursor-pointer"
+                                      key={imageId}
+                                      src={`http://localhost:5027/api/ImageGallery/${imageId}`} className="h-20 aspect-square object-cover rounded-md cursor-pointer"
                                       onClick={() => {
                                         if (field.value.delete(imageId)) {
                                           field.onChange(new Set(field.value));
