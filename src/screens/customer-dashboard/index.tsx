@@ -38,6 +38,8 @@ function CustomerDashboard() {
                   <TableHead>First Name</TableHead>
                   <TableHead>Last Name</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Email Verified</TableHead>
+                  <TableHead>Enabled</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -54,6 +56,8 @@ function CustomerDashboard() {
                       <TableCell>{customer.firstName}</TableCell>
                       <TableCell>{customer.lastName}</TableCell>
                       <TableCell>{customer.email}</TableCell>
+                      <TableCell>{customer.emailVerified ? "Verified" : "Not verified"}</TableCell>
+                      <TableCell>{customer.enabled ? "True" : "False"}</TableCell>
                     </TableRow>
                   );
                 })}

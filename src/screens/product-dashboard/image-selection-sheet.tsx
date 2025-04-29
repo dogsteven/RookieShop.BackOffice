@@ -3,7 +3,7 @@ import { fetchImagePage, uploadImage } from "@/app/redux/image-gallery/image-gal
 import RookieShopPagination from "@/components/rookie-shop-pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn, resolveImageUrl } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 interface ImageSelectionProps {
@@ -33,7 +33,7 @@ function ImageSelectionSheet({ onSubmit }: ImageSelectionProps) {
         {images.map((image) => {
           return (
             <img
-              key={image.id} src={`http://localhost:5027/api/ImageGallery/${image.id}`}
+              key={image.id} src={resolveImageUrl(image.id)}
               className={cn("w-full aspect-square object-cover cursor-pointer rounded-md", selectedId == image.id && "border-3 border-green-500")}
               onClick={() => setSelectedId(image.id)}
             />

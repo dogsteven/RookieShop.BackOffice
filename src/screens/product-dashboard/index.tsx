@@ -1,10 +1,10 @@
 import { useAppDispatch, useAppSelector, useFetchProductPageByPageNumber } from "@/app/redux/hook";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-separator";
 import CreateProductForm from "./create-product-form";
-import { clearError, clearSuccess, deleteProduct, fetchProductPage } from "@/app/redux/products/products-slice";
+import { clearError, clearSuccess, deleteProduct, fetchProductPage, setSemantic } from "@/app/redux/products/products-slice";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import UpdateProductForm from "./update-product-form";
@@ -14,9 +14,12 @@ import RookieShopPagination from "@/components/rookie-shop-pagination";
 import { fetchCategories } from "@/app/redux/categories/categories-slice";
 import { fetchImagePage } from "@/app/redux/image-gallery/image-gallery-slice";
 import ProductDto from "@/app/models/product-dto";
+import { resolveImageUrl } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 
 function ProductDashboard() {
-  const { productCount, currentPageNumber, pageSize, products, success, error, isLoading: { fetchProductPage: isLoading } } = useAppSelector(state => state.products);
+  const { semantic, productCount, currentPageNumber, pageSize, products, success, error, isLoading: { fetchProductPage: isLoading } } = useAppSelector(state => state.products);
 
   const dispatch = useAppDispatch();
   
@@ -57,18 +60,55 @@ function ProductDashboard() {
   const [createProductFormOpen, setCreateProductFormOpen] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState<ProductDto | undefined>(undefined);
+
+  const [semanticSearchOpen, setSemanticSearchOpen] = useState(false);
+  
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   
   return (
     <>
       <CreateProductForm open={createProductFormOpen} setOpen={setCreateProductFormOpen} />
       <UpdateProductForm selectedProduct={selectedProduct} unselectProduct={() => setSelectedProduct(undefined)} />
 
+      <Dialog
+        open={semanticSearchOpen}
+        onOpenChange={setSemanticSearchOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Semantic search</DialogTitle>
+          </DialogHeader>
+
+          <Input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Search string"
+            value={semantic}
+            onChange={(event) => {
+              dispatch(setSemantic(event.target.value));
+            }}
+            onKeyUp={async (event) => {
+              event.preventDefault();
+              if (event.key == "Enter") {
+                await fetctProductPageByPageNumber(1);
+
+                if (searchInputRef.current) {
+                  searchInputRef.current.focus();
+                }
+              }
+            }}
+            disabled={isLoading}
+          />
+        </DialogContent>
+      </Dialog>
+
       <header className="sticky top-0 z-50 bg-background flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-4 h-4" />
         <span className="mr-auto">Products</span>
         
-        <Button onClick={() => setCreateProductFormOpen(true)}>New Product</Button>
+        <Button type="button" onClick={() => setSemanticSearchOpen(true)}>Search</Button>
+        <Button type="button" onClick={() => setCreateProductFormOpen(true)}>New Product</Button>
       </header>
 
       <div className="flex flex-col w-full pb-4">
@@ -85,6 +125,7 @@ function ProductDashboard() {
                   <TableHead>Price</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Featured</TableHead>
+                  <TableHead>Availability</TableHead>
                   <TableHead></TableHead>
                   <TableHead></TableHead>
                 </TableRow>
@@ -92,7 +133,7 @@ function ProductDashboard() {
 
               <TableBody>
                 {products.map(product => {
-                  const primaryImageUrl = `http://localhost:5027/api/ImageGallery/${product.primaryImageId}`;
+                  const primaryImageUrl = resolveImageUrl(product.primaryImageId);
 
                   return (
                     <TableRow key={product.sku}>
@@ -105,6 +146,7 @@ function ProductDashboard() {
                       <TableCell>{product.price}</TableCell>
                       <TableCell>{product.categoryName}</TableCell>                    
                       <TableCell>{product.isFeatured ? "Yes" : "No"}</TableCell>
+                      <TableCell>{product.availableQuantity}</TableCell>
                       <TableCell>
                         <Button onClick={() => setSelectedProduct(product)}>Edit</Button>
                       </TableCell>

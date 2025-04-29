@@ -4,4 +4,6 @@ export default interface CustomerDto {
   firstName: string
   lastName: string
   email: string
+  emailVerified: boolean
+  enabled: boolean
 }

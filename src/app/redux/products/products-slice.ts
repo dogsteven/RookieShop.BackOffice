@@ -1,6 +1,6 @@
 import Pagination from "@/app/models/pagination";
 import ProductDto from "@/app/models/product-dto";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ExtraArguments, RootState } from "../store";
 import { ProblemDetails, ProblemDetailsError } from "@/app/services/api-client";
 
@@ -9,6 +9,8 @@ interface ProductsState {
   productCount: number
   currentPageNumber: number
   pageSize: number
+
+  semantic: string
 
   isLoading: {
     fetchProductPage: boolean
@@ -33,6 +35,8 @@ const initialState: ProductsState = {
   productCount: 0,
   currentPageNumber: 1,
   pageSize: 12,
+
+  semantic: "",
   
   isLoading: {
     fetchProductPage: false,
@@ -43,6 +47,7 @@ const initialState: ProductsState = {
 };
 
 interface FetchProductPageModel {
+  semantic?: string
   pageNumber: number
   pageSize: number
 }
@@ -77,6 +82,10 @@ export const fetchProductPage = createAsyncThunk<Pagination<ProductDto>, FetchPr
   const productService = thunkApi.extra.productService;
 
   try {
+    if (model.semantic) {
+      return productService.getSemanticallyOrderedProducts(model.semantic, model.pageNumber, model.pageSize);
+    }
+
     return await productService.getProducts(model.pageNumber, model.pageSize);
   } catch (error) {
     return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
@@ -138,6 +147,10 @@ const productsSlice = createSlice({
   name: "products",
   initialState: initialState,
   reducers: {
+    setSemantic: (state, action: PayloadAction<string>) => {
+      state.semantic = action.payload;
+    },
+
     clearSuccess: (state) => {
       state.success = undefined;
     },
@@ -243,6 +256,7 @@ const productsSlice = createSlice({
 
 
 export const {
+  setSemantic,
   clearSuccess,
   clearError
 } = productsSlice.actions;

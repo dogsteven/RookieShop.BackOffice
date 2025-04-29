@@ -8,4 +8,5 @@ export default interface ProductDto {
   primaryImageId: string
   supportingImageIds: string[]
   isFeatured: boolean
+  availableQuantity: number
 }

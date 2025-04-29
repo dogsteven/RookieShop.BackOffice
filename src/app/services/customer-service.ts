@@ -13,7 +13,7 @@ export class CustomerApiService implements CustomerService {
   }
 
   public async getCustomers(pageNumber: number, pageSize: number): Promise<CustomerDto[]> {
-    return await this.client.get("/api/Customer", {
+    return await this.client.get("/customers/api", {
       params: {
         pageNumber: pageNumber,
         pageSize: pageSize

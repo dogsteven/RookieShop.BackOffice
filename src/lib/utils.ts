@@ -12,3 +12,7 @@ export function range(start: number, end: number): number[] {
 
   return [...Array(end - start + 1).keys()].map(index => index + start);
 }
+
+export function resolveImageUrl(id: string): string {
+  return `http://localhost:5027/image-gallery/api/${id}`;
+}

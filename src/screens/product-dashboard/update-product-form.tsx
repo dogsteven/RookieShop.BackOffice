@@ -15,6 +15,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import ImageSelectionSheet from "./image-selection-sheet";
 import ProductDto from "@/app/models/product-dto";
+import { resolveImageUrl } from "@/lib/utils";
 
 const updateProductFormSchema = z.object({
   name: z.string().min(1).max(100),
@@ -196,7 +197,7 @@ function UpdateProductForm({ selectedProduct, unselectProduct }: UpdateProductFo
                           <Sheet>
                             <SheetTrigger asChild>
                               <div className="flex flex-row max-h-40 p-4 justify-between items-center border-dashed border rounded-md cursor-pointer">
-                                {field.value && <img src={`http://localhost:5027/api/ImageGallery/${field.value}`} className="h-full aspect-square object-cover cursor-pointer rounded-md"/>}
+                                {field.value && <img src={resolveImageUrl(field.value)} className="h-full aspect-square object-cover cursor-pointer rounded-md"/>}
                                 <span className="mx-auto">{field.value ? "Select another image" : "Select image"}</span>
                               </div>
                             </SheetTrigger>
@@ -238,7 +239,7 @@ function UpdateProductForm({ selectedProduct, unselectProduct }: UpdateProductFo
                                   return (
                                     <img
                                       key={imageId}
-                                      src={`http://localhost:5027/api/ImageGallery/${imageId}`} className="h-20 aspect-square object-cover rounded-md cursor-pointer"
+                                      src={resolveImageUrl(imageId)} className="h-20 aspect-square object-cover rounded-md cursor-pointer"
                                       onClick={() => {
                                         if (field.value.delete(imageId)) {
                                           field.onChange(new Set(field.value));

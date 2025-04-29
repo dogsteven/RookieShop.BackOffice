@@ -16,11 +16,11 @@ export class CategoryApiService implements CategoryService {
   }
 
   public async getCategories(): Promise<CategoryDto[]> {
-    return await this.client.get("/api/Category");
+    return await this.client.get("/product-catalog/api/categories");
   }
 
   public async createCategory(name: string, description: string): Promise<number> {
-    const { id } = await this.client.post<{ id: number }>("/api/Category", {
+    const { id } = await this.client.post<{ id: number }>("/product-catalog/api/categories", {
       name: name,
       description: description
     });
@@ -29,13 +29,13 @@ export class CategoryApiService implements CategoryService {
   }
 
   public async updateCategory(id: number, name: string, description: string): Promise<void> {
-    await this.client.put(`/api/Category/${id}`, {
+    await this.client.put(`/product-catalog/api/categories/${id}`, {
       name: name,
       description: description
     });
   }
 
   public async deleteCategory(id: number): Promise<void> {
-    await this.client.delete(`/api/Category/${id}`);
+    await this.client.delete(`/product-catalog/api/categories/${id}`);
   }
 }

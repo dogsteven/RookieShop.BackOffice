@@ -10,11 +10,15 @@ export const useAppSelector = useSelector.withTypes<RootState>()
 
 export function useFetchProductPageByPageNumber(): (pageNumber: number) => Promise<void> {
   const dispatch = useAppDispatch();
-  const { pageSize } = useAppSelector(state => state.products);
+  const { semantic, pageSize } = useAppSelector(state => state.products);
 
   return useCallback(async (pageNumber: number) => {
-    await dispatch(fetchProductPage({ pageNumber, pageSize }));
-  }, [pageSize]);
+    if (semantic.length == 0) {
+      await dispatch(fetchProductPage({ pageNumber, pageSize }));
+    } else {
+      await dispatch(fetchProductPage({ semantic, pageNumber, pageSize }));
+    }
+  }, [semantic, pageSize]);
 }
 
 export function useFetchCustomerPageByPageNumber(): (pageNumber: number) => Promise<void> {

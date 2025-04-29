@@ -16,7 +16,7 @@ export class ImageGalleryApiService implements ImageGalleryService {
   }
   
   public async getImages(pageNumber: number, pageSize: number): Promise<Pagination<ImageDto>> {
-    return this.client.get("/api/ImageGallery", {
+    return this.client.get("/image-gallery/api", {
       params: {
         pageNumber: pageNumber,
         pageSize: pageSize
@@ -28,7 +28,7 @@ export class ImageGalleryApiService implements ImageGalleryService {
     var form = new FormData();
     form.append("File", file);
 
-    await this.client.post("/api/ImageGallery", form, {
+    await this.client.post("/image-gallery/api", form, {
       headers: {
         "Content-Type": "multipart/form-data"
       }

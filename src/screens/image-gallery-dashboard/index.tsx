@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import UploadImageForm from "./upload-image-form";
 import { deleteImage, fetchImagePage } from "@/app/redux/image-gallery/image-gallery-slice";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
+import { cn, resolveImageUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import RookieShopPagination from "@/components/rookie-shop-pagination";
 
@@ -77,7 +77,7 @@ function ImageGalleryDashboard() {
 
             return (
               <img
-                key={image.id} src={`http://localhost:5027/api/ImageGallery/${image.id}`}
+                key={image.id} src={resolveImageUrl(image.id)}
                 className={cn("w-full aspect-square object-cover cursor-pointer rounded-md", selected && "border-3 border-red-500")}
                 onClick={() => {
                   const index = selectedImages.indexOf(image.id);
