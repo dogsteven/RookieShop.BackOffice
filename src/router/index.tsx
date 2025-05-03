@@ -9,6 +9,7 @@ import Home from "@/screens/home";
 import OidcCallback from "@/oidc/callback";
 import UnauthorizedErrorScreen from "@/screens/unauthorized-error";
 import ImageGalleryDashboard from "@/screens/image-gallery-dashboard";
+import StockDashboard from "@/screens/stock-dashboard";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: "/products",
         Component: ProductDashboard
+      },
+      {
+        path: "/stock",
+        Component: StockDashboard
       },
       {
         path: "/categories",

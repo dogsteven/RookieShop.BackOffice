@@ -17,6 +17,7 @@ interface ProductsState {
     createProduct: boolean
     updateProduct: boolean
     deleteProduct: boolean
+    increaseStock: boolean
   }
 
   success?: {
@@ -42,7 +43,8 @@ const initialState: ProductsState = {
     fetchProductPage: false,
     createProduct: false,
     updateProduct: false,
-    deleteProduct: false
+    deleteProduct: false,
+    increaseStock: false
   }
 };
 
@@ -78,6 +80,11 @@ interface DeleteProductModel {
   sku: string
 }
 
+interface IncreaseStockModel {
+  sku: string
+  quantity: number
+}
+
 export const fetchProductPage = createAsyncThunk<Pagination<ProductDto>, FetchProductPageModel, { extra: ExtraArguments, state: RootState }>("products/fetchProductPage", async (model, thunkApi) => {
   const productService = thunkApi.extra.productService;
 
@@ -101,6 +108,7 @@ export const createProduct = createAsyncThunk<void, CreateProductModel, { extra:
     await productService.createProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.primaryImageId, model.supportingImageIds, model.isFeatured);
 
     await dispatch(fetchProductPage({
+      semantic: state.semantic,
       pageNumber: 1,
       pageSize: state.pageSize
     }));
@@ -118,6 +126,7 @@ export const updateProduct = createAsyncThunk<void, UpdateProductModel, { extra:
     await productService.updateProduct(model.sku, model.name, model.description, model.price, model.categoryId, model.primaryImageId, model.supportingImageIds, model.isFeatured);
 
     await dispatch(fetchProductPage({
+      semantic: state.semantic,
       pageNumber: 1,
       pageSize: state.pageSize
     }));
@@ -135,11 +144,24 @@ export const deleteProduct = createAsyncThunk<void, DeleteProductModel, { extra:
     await productService.deleteProduct(model.sku);
 
     await dispatch(fetchProductPage({
+      semantic: state.semantic,
       pageNumber: 1,
       pageSize: state.pageSize
     }));
   } catch (error) {
     return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails); 
+  }
+});
+
+export const increaseStock = createAsyncThunk<IncreaseStockModel, IncreaseStockModel, { extra: ExtraArguments, state: RootState }>("products/increaseStock", async (model, thunkApi) => {
+  const stockService = thunkApi.extra.stockService;
+
+  try {
+    await stockService.increaseStock(model.sku, model.quantity);
+
+    return model;
+  } catch (error) {
+    return thunkApi.rejectWithValue((error as ProblemDetailsError).problemDetails);
   }
 });
 
@@ -243,6 +265,39 @@ const productsSlice = createSlice({
       })
       .addCase(deleteProduct.rejected, (state, action) => {
         state.isLoading.deleteProduct = false;
+
+        const payload = action.payload as ProblemDetails;
+
+        state.error = {
+          title: payload.title,
+          detail: payload.detail
+        };
+      });
+    
+    builder
+      .addCase(increaseStock.pending, (state) => {
+        state.isLoading.increaseStock = true;
+      })
+      .addCase(increaseStock.fulfilled, (state, action) => {
+        for (const product of state.products) {
+          if (product.sku != action.payload.sku) {
+            continue;
+          }
+
+          product.availableQuantity += action.payload.quantity;
+
+          break;
+        }
+
+        state.isLoading.increaseStock = false;
+
+        state.success = {
+          title: "Success",
+          detail: "Stock was successfully increased"
+        };
+      })
+      .addCase(increaseStock.rejected, (state, action) => {
+        state.isLoading.increaseStock = false;
 
         const payload = action.payload as ProblemDetails;
 

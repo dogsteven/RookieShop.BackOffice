@@ -1,40 +1,28 @@
-import { useAppDispatch, useAppSelector, useFetchProductPageByPageNumber } from "@/app/redux/hook";
-import { useEffect, useRef, useState } from "react";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import CreateProductForm from "./create-product-form";
-import { clearError, clearSuccess, deleteProduct, fetchProductPage, setSemantic } from "@/app/redux/products/products-slice";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import UpdateProductForm from "./update-product-form";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
-import RookieShopPagination from "@/components/rookie-shop-pagination";
-import { fetchCategories } from "@/app/redux/categories/categories-slice";
-import { fetchImagePage } from "@/app/redux/image-gallery/image-gallery-slice";
 import ProductDto from "@/app/models/product-dto";
-import { resolveImageUrl } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
+import { useAppDispatch, useAppSelector, useFetchProductPageByPageNumber } from "@/app/redux/hook";
+import { clearError, clearSuccess, fetchProductPage, setSemantic } from "@/app/redux/products/products-slice";
+import RookieShopPagination from "@/components/rookie-shop-pagination";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { resolveImageUrl } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
+import IncreaseStockForm from "./increase-stock-form";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
-function ProductDashboard() {
+function StockDashboard() {
   const { semantic, productCount, currentPageNumber, pageSize, products, success, error, isLoading: { fetchProductPage: isLoading } } = useAppSelector(state => state.products);
 
   const dispatch = useAppDispatch();
-  
+    
   const fetctProductPageByPageNumber = useFetchProductPageByPageNumber();
 
   useEffect(() => {
     dispatch(fetchProductPage({ pageNumber: 1, pageSize: 9 }));
-  }, []);
-
-  useEffect(() => {
-    dispatch(fetchCategories());
-  }, []);
-
-  useEffect(() => {
-    dispatch(fetchImagePage({ pageNumber: 1, pageSize: 9 }));
   }, []);
 
   useEffect(() => {
@@ -56,19 +44,16 @@ function ProductDashboard() {
       dispatch(clearError());
     }
   }, [error]);
-  
-  const [createProductFormOpen, setCreateProductFormOpen] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState<ProductDto | undefined>(undefined);
 
   const [semanticSearchOpen, setSemanticSearchOpen] = useState(false);
-  
+
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-  
+
   return (
     <>
-      <CreateProductForm open={createProductFormOpen} setOpen={setCreateProductFormOpen} />
-      <UpdateProductForm selectedProduct={selectedProduct} unselectProduct={() => setSelectedProduct(undefined)} />
+      <IncreaseStockForm selectedProduct={selectedProduct} unselectProduct={() => setSelectedProduct(undefined)} />
 
       <Dialog
         open={semanticSearchOpen}
@@ -105,10 +90,9 @@ function ProductDashboard() {
       <header className="sticky top-0 z-50 bg-background flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-4 h-4" />
-        <span className="mr-auto">Products</span>
-        
+        <span className="mr-auto">Stock</span>
+
         <Button type="button" onClick={() => setSemanticSearchOpen(true)}>Search</Button>
-        <Button type="button" onClick={() => setCreateProductFormOpen(true)}>New Product</Button>
       </header>
 
       <div className="flex flex-col w-full pb-4">
@@ -121,18 +105,13 @@ function ProductDashboard() {
                   <TableHead>Image</TableHead>
                   <TableHead>SKU</TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Featured</TableHead>
                   <TableHead>Availability</TableHead>
-                  <TableHead></TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
-                {products.map(product => {
+              {products.map(product => {
                   const primaryImageUrl = resolveImageUrl(product.primaryImageId);
 
                   return (
@@ -142,31 +121,9 @@ function ProductDashboard() {
                       </TableCell>
                       <TableCell>{product.sku}</TableCell>
                       <TableCell>{product.name}</TableCell>
-                      <TableCell className="max-w-100 text-ellipsis overflow-hidden">{product.description}</TableCell>
-                      <TableCell>{product.price}</TableCell>
-                      <TableCell>{product.categoryName}</TableCell>                    
-                      <TableCell>{product.isFeatured ? "Yes" : "No"}</TableCell>
                       <TableCell>{product.availableQuantity}</TableCell>
                       <TableCell>
-                        <Button onClick={() => setSelectedProduct(product)}>Edit</Button>
-                      </TableCell>
-                      <TableCell>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive">Delete</Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>Are you sure you want to delete product "{product.sku}"?</AlertDialogDescription>
-                            </AlertDialogHeader>
-
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => dispatch(deleteProduct({ sku: product.sku }))}>Delete</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <Button onClick={() => setSelectedProduct(product)}>Increase stock</Button>
                       </TableCell>
                     </TableRow>
                   );
@@ -189,4 +146,4 @@ function ProductDashboard() {
   )
 }
 
-export default ProductDashboard;
+export default StockDashboard;

@@ -36,6 +36,6 @@ export class ImageGalleryApiService implements ImageGalleryService {
   }
 
   public async deleteImage(id: string): Promise<void> {
-    await this.client.delete(`/api/ImageGallery/${id}`);
+    await this.client.delete(`/image-gallery/api/${id}`);
   }
 }

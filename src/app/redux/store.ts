@@ -8,6 +8,7 @@ import CustomerService, { CustomerApiService } from "../services/customer-servic
 import customersReducer from "./customers/customers-slice";
 import ImageGalleryService, { ImageGalleryApiService } from "../services/image-gallery-service";
 import imageGalleryReducer from "./image-gallery/image-gallery-slice";
+import StockService, { StockApiService } from "../services/stock-service";
 
 const store = configureStore({
   reducer: {
@@ -22,7 +23,8 @@ const store = configureStore({
         productService: new ProductApiService(rookieShopApiClient),
         categoryService: new CategoryApiService(rookieShopApiClient),
         customerService: new CustomerApiService(rookieShopApiClient),
-        imageGalleryService: new ImageGalleryApiService(rookieShopApiClient)
+        imageGalleryService: new ImageGalleryApiService(rookieShopApiClient),
+        stockService: new StockApiService(rookieShopApiClient)
       }
     }
   })
@@ -33,8 +35,9 @@ export default store;
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
 export type ExtraArguments = {
-  productService: ProductService,
-  categoryService: CategoryService,
-  customerService: CustomerService,
+  productService: ProductService
+  categoryService: CategoryService
+  customerService: CustomerService
   imageGalleryService: ImageGalleryService
+  stockService: StockService
 }

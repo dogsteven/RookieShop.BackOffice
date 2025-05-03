@@ -32,11 +32,15 @@ function RookieShopPagination({ itemCount, currentPageNumber, pageSize, setCurre
       <div className="flex flex-row content-center">
         <Pagination>
           <PaginationContent>
-            {currentPageNumber > 1
-            &&
             <PaginationItem key={"previous"}>
-              <PaginationPrevious onClick={() => setCurrentPageNumber(currentPageNumber - 1)} />
-            </PaginationItem>}
+              <PaginationPrevious
+                onClick={() => {
+                  if (currentPageNumber > 1) {
+                    setCurrentPageNumber(currentPageNumber - 1); 
+                  }
+                }}
+              />
+            </PaginationItem>
 
             {numberOfPages <= 6
             &&
@@ -84,11 +88,15 @@ function RookieShopPagination({ itemCount, currentPageNumber, pageSize, setCurre
             </>
             }
 
-            {currentPageNumber < numberOfPages
-            &&
             <PaginationItem key={"next"}>
-              <PaginationNext onClick={() => setCurrentPageNumber(currentPageNumber + 1)} />
-            </PaginationItem>}
+              <PaginationNext
+                onClick={() => {
+                  if (currentPageNumber < numberOfPages) {
+                    setCurrentPageNumber(currentPageNumber + 1);
+                  }
+                }}
+              />
+            </PaginationItem>
           </PaginationContent>
         </Pagination>
       </div>
@@ -99,11 +107,15 @@ function RookieShopPagination({ itemCount, currentPageNumber, pageSize, setCurre
     <div className="flex flex-row content-center">
         <Pagination>
           <PaginationContent>
-            {currentPageNumber > 1
-            &&
             <PaginationItem key={"previous"}>
-              <PaginationPrevious onClick={() => setCurrentPageNumber(currentPageNumber - 1)} />
-            </PaginationItem>}
+              <PaginationPrevious
+                onClick={() => {
+                  if (currentPageNumber > 1) {
+                    setCurrentPageNumber(currentPageNumber - 1); 
+                  }
+                }}
+              />
+            </PaginationItem>
 
             <PaginationItem key={"next"}>
               <PaginationNext onClick={() => setCurrentPageNumber(currentPageNumber + 1)} />
